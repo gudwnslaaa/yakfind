@@ -94,16 +94,26 @@ export default async function handler(req, res) {
     ttl = 3600;
   }
 
-  let text;
+  const call = async params => {
+    const r = await fetch(UPSTREAM + ROUTES[action] + '?' + new URLSearchParams(params), { signal: AbortSignal.timeout(12000) });
+    const text = await r.text();
+    let d;
+    try { d = parseJson(JSON.parse(text)); } catch { d = parseXml(text); }
+    return d;
+  };
+
+  let d;
   try {
-    const r = await fetch(UPSTREAM + ROUTES[action] + '?' + new URLSearchParams(p), { signal: AbortSignal.timeout(12000) });
-    text = await r.text();
+    d = await call(p);
+    // 성분 검색은 결과가 많아서(아세트아미노펜 1천 건 이상) 최대 5쪽(500건)까지 이어서 받음
+    if (action === 'ingr' && !d.gateway && d.total > d.items.length) {
+      const pages = Math.min(5, Math.ceil(d.total / 100));
+      const more = await Promise.all(Array.from({ length: pages - 1 }, (_, i) => call({ ...p, pageNo: i + 2 }).catch(() => null)));
+      for (const m of more) if (m && m.items) d.items.push(...m.items);
+    }
   } catch (e) {
     return send(res, 502, { ok: false, error: '공공데이터 서버에 연결하지 못했어요. 잠시 후 다시 시도해 주세요.' });
   }
-
-  let d;
-  try { d = parseJson(JSON.parse(text)); } catch { d = parseXml(text); }
   if (d.gateway) return send(res, 502, { ok: false, error: keyHint(d.gateway) });
   if (d.code && d.code !== '00' && d.code !== '0') return send(res, 502, { ok: false, error: keyHint(d.msg || '오류 ' + d.code) });
   return send(res, 200, { ok: true, total: d.total, items: d.items }, ttl);
