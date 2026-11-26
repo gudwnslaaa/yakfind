@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이 약 어디 있지?</title>
+<meta name="description" content="약 이름으로 성분과 같은 성분 제품을 찾고, 지금 문 연 내 주변 약국에 바로 전화해 보세요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;600;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 동네 약국 카운터처럼 차분하고 친절하게, 할 일이 바로 보이게
+   IDEA: 약 봉투 — 흰 종이 위에 빨간 '약' 글자, 이름·성분·약국을 차례로 적어 주는 봉투
+   PICTURE: 맨 위 검색창 자체가 주인공, 아래로 봉투 같은 결과 카드
+   COLOUR and TYPE: 흰 종이 + 먹색 글씨 + 간판 빨강 한 가지, 보조로 연한 종이색 / Gothic A1 굵게 + Noto Sans KR
+   LAYOUT: 넓으면 왼쪽 약, 오른쪽 약국 두 단 / 600px 아래는 한 줄로 */
+:root{color-scheme:light dark;
+  --bg:light-dark(#ffffff,#15171a);--paper:light-dark(#f6f3ee,#1f2226);--ink:light-dark(#1b1d20,#eceae6);
+  --mute:light-dark(#5f646b,#a3a7ad);--line:light-dark(#e3ded6,#33373c);--red:light-dark(#d1291f,#ff6a5e);
+  --redbg:light-dark(#fdecea,#3a1f1d);--ok:light-dark(#1f6f45,#7fd3a3);--okbg:light-dark(#e6f4ec,#1d3327)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Gothic A1","Noto Sans KR",sans-serif;line-height:1.15;text-wrap:balance;margin:0}
+a{color:inherit}
+.band{padding:clamp(20px,3.5vw,48px) max(5vw,16px)}
+.wrap{max-width:1180px;margin:0 auto}
+header.band{border-bottom:1px solid var(--line);padding-bottom:28px}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.sign{width:52px;height:52px;border-radius:12px;background:var(--red);color:#fff;display:grid;place-items:center;font:800 30px/1 "Gothic A1",sans-serif;flex:none}
+h1{font-size:clamp(28px,4.6vw,46px);font-weight:800}
+.lead{color:var(--mute);margin:6px 0 0;max-width:60ch}
+form.search{display:flex;gap:10px;margin-top:8px}
+input,select,button{font:inherit;font-size:16px}
+.search input{flex:1;height:60px;border:2px solid var(--ink);border-radius:14px;padding:0 18px;background:var(--bg);color:var(--ink);font-size:18px}
+.search input:focus,input:focus-visible,button:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.btn{height:44px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;font-weight:600;white-space:nowrap}
+.btn.main{height:60px;padding:0 26px;background:var(--ink);color:var(--bg);border-color:var(--ink);font-size:17px}
+.btn.red{background:var(--red);border-color:var(--red);color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.recent{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{border:1px solid var(--line);background:none;color:var(--mute);border-radius:999px;padding:6px 14px;cursor:pointer;font-size:14px;min-height:36px}
+.grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(20px,3vw,40px);align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+h2{font-size:22px;font-weight:800;margin-bottom:12px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+h2 small{font:400 14px "Noto Sans KR";color:var(--mute)}
+.list{display:flex;flex-direction:column;gap:8px}
+.item{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);padding:14px 16px;cursor:pointer}
+.item:hover{border-color:var(--ink)}
+.item.on{border:2px solid var(--red);padding:13px 15px}
+.item b{display:block;font-size:16px}
+.item span{color:var(--mute);font-size:14px}
+.tag{display:inline-block;font-size:13px;font-weight:600;border-radius:6px;padding:1px 8px;white-space:nowrap;flex:none}
+.tag.rx{background:var(--redbg);color:var(--red)}.tag.otc{background:var(--okbg);color:var(--ok)}
+.tag.open{background:var(--okbg);color:var(--ok)}.tag.closed{background:var(--paper);color:var(--mute)}
+.env{background:var(--paper);border-radius:18px;padding:clamp(18px,3vw,28px);margin-top:18px;border-top:6px solid var(--red)}
+.env h3{font-size:clamp(22px,3vw,30px);font-weight:800}
+.env .co{color:var(--mute);margin:4px 0 14px}
+.ingr{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
+.ingr span{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-weight:500}
+.note{font-size:14px;color:var(--mute);margin:10px 0 0}
+.warn{font-size:14px;background:var(--redbg);color:var(--ink);border-radius:10px;padding:10px 14px;margin:12px 0 0}
+details{border-top:1px solid var(--line);padding:10px 0}
+details:last-of-type{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;font-weight:600;min-height:28px}
+details p{margin:8px 0 0;white-space:pre-line;font-size:15px}
+.pill{width:84px;height:84px;border-radius:12px;object-fit:cover;background:var(--bg);float:right;margin:0 0 10px 14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.same{margin-top:14px}
+.same .item{cursor:default;padding:10px 14px}
+.ph{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--bg)}
+.ph .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.ph b{font-size:17px}
+.ph .addr{color:var(--mute);font-size:14px;margin:2px 0 8px}
+.ph .meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:14px;color:var(--mute)}
+.ph .tel{font-weight:700;color:var(--ink);text-decoration:none;font-size:16px;white-space:nowrap}
+.ph .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.ph .acts a{display:inline-flex;align-items:center;text-decoration:none}
+.area{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px;margin-top:10px}
+.area input{height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;background:var(--bg);color:var(--ink)}
+.toggle{display:flex;gap:8px;align-items:center;margin:12px 0;font-size:15px}
+.toggle input{width:20px;height:20px;accent-color:var(--red)}
+.script{background:var(--paper);border-radius:14px;padding:14px 16px;margin-bottom:12px;font-size:15px}
+.script q{font-weight:600}
+.empty{color:var(--mute);border:1px dashed var(--line);border-radius:14px;padding:22px;text-align:center}
+.err{color:var(--red);font-weight:500}
+.load{color:var(--mute)}
+.load::after{content:"";display:inline-block;width:14px;height:14px;margin-left:8px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(1turn)}}
+@media(prefers-reduced-motion:reduce){.load::after{animation:none}}
+footer{border-top:1px solid var(--line);color:var(--mute);font-size:14px}
+footer p{margin:4px 0;max-width:80ch}
+@media(max-width:600px){form.search{flex-direction:column}.search input{flex:none}.btn.main{width:100%}.area{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.area .btn{grid-column:1/-1}.pill{width:64px;height:64px}}
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="wrap">
+    <div class="brand"><div class="sign" aria-hidden="true">약</div>
+      <div><h1>이 약, 어디 있지?</h1>
+      <p class="lead">약 이름을 넣으면 성분과 같은 성분 제품을 알려드려요. 지금 문 연 가까운 약국에 바로 전화해 보세요.</p></div>
+    </div>
+    <form class="search" id="f" role="search">
+      <label for="q" class="sr" hidden>약 이름</label>
+      <input id="q" name="q" type="search" placeholder="예: 타이레놀, 게보린, 판콜" autocomplete="off" enterkeyhint="search" required minlength="2">
+      <button class="btn main" type="submit">찾기</button>
+    </form>
+    <div class="recent" id="recent"></div>
+  </div>
+</header>
+
+<main class="band">
+  <div class="wrap grid">
+    <section aria-labelledby="h-drug">
+      <h2 id="h-drug">약 검색 결과 <small id="cnt"></small></h2>
+      <div id="drugs" class="list"><div class="empty">찾는 약 이름을 위에 입력해 주세요.</div></div>
+      <div id="detail"></div>
+    </section>
+
+    <section aria-labelledby="h-ph">
+      <h2 id="h-ph">문 연 약국 <small>전화로 재고를 물어보세요</small></h2>
+      <div id="script"></div>
+      <div class="row" style="margin-top:0">
+        <button class="btn red" id="geo" type="button">내 위치로 주변 약국 찾기</button>
+      </div>
+      <form class="area" id="af">
+        <input id="sido" placeholder="시·도 (예: 서울특별시)" aria-label="시·도">
+        <input id="gu" placeholder="시·군·구 (예: 마포구)" aria-label="시·군·구">
+        <button class="btn" type="submit">지역으로 찾기</button>
+      </form>
+      <label class="toggle"><input type="checkbox" id="onlyOpen" checked> 지금 영업 중인 곳만 보기</label>
+      <div id="phs" class="list"><div class="empty">위치를 허용하거나 지역을 입력하면 약국 목록이 나와요.</div></div>
+    </section>
+  </div>
+</main>
+
+<footer class="band">
+  <div class="wrap">
+    <p>약 정보: 식품의약품안전처 의약품 제품 허가정보·의약품개요정보(e약은요). 약국 정보: 국립중앙의료원 전국 약국 정보. 공공데이터포털(data.go.kr) 제공.</p>
+    <p>약국 재고는 공개된 정보가 없어서 보여드리지 않아요. 영업시간은 등록된 정보 기준이라 공휴일이나 임시 휴무와 다를 수 있으니 전화로 확인해 주세요.</p>
+    <p>이 사이트는 정보 안내만 하며 약을 팔지 않습니다. 복용은 반드시 약사나 의사와 상담하세요.</p>
+  </div>
+</footer>
+
+<script>
+{
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clean = v => String(v ?? '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/[ \t]+/g, ' ').trim();
+const pick = (o, ...ks) => { for (const k of ks) if (o[k]) return o[k]; return ''; };
+const store = {get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+let current = null;     // 선택한 약
+let pharmacies = [];    // 불러온 약국
+let lastPhMode = '';
+
+async function api(params) {
+  const r = await fetch('/api/yak?' + new URLSearchParams(params));
+  let j; try { j = await r.json(); } catch (e) { throw new Error('서버 응답을 읽지 못했어요.'); }
+  if (!j.ok) throw new Error(j.error || '오류가 났어요.');
+  return j;
+}
+
+/* ---------- 성분 정리 ---------- */
+function ingredients(d) {
+  const raw = pick(d, 'ITEM_INGR_NAME', 'MAIN_ITEM_INGR', 'MAIN_INGR_ENG') ;
+  const list = raw.replace(/\[[A-Z]?\d+\]/g, '').split(/[\/|,;]+/).map(s => s.trim()).filter(Boolean);
+  return [...new Set(list)];
+}
+const isRx = d => /전문/.test(d.SPCLTY_PBLC || '');
+const alive = d => !/취소|취하|폐지/.test(d.CANCEL_NAME || '');
+const nameOf = d => clean(pick(d, 'ITEM_NAME', 'ITEMNAME'));
+const shortName = n => n.replace(/\(.*?\)/g, '').trim();
+
+/* ---------- 최근 검색 ---------- */
+function drawRecent() {
+  const r = store.get('yak_recent', []);
+  $('#recent').innerHTML = r.map(t => `<button type="button" class="chip" data-q="${esc(t)}">${esc(t)}</button>`).join('');
+}
+$('#recent').addEventListener('click', e => { const b = e.target.closest('[data-q]'); if (b) { $('#q').value = b.dataset.q; search(b.dataset.q); } });
+
+/* ---------- 약 검색 ---------- */
+let drugResults = [];
+async function search(q) {
+  q = q.trim(); if (q.length < 2) return;
+  const r = store.get('yak_recent', []).filter(t => t !== q); r.unshift(q); store.set('yak_recent', r.slice(0, 6)); drawRecent();
+  $('#drugs').innerHTML = '<div class="load">찾는 중</div>'; $('#detail').innerHTML = ''; $('#cnt').textContent = '';
+  try {
+    const j = await api({action: 'drug', q});
+    drugResults = j.items.filter(alive);
+    $('#cnt').textContent = drugResults.length ? `${drugResults.length}개` : '';
+    if (!drugResults.length) { $('#drugs').innerHTML = '<div class="empty">검색 결과가 없어요. 띄어쓰기를 빼거나 제품명 일부만 넣어 보세요.</div>'; return; }
+    $('#drugs').innerHTML = drugResults.map((d, i) => `
+      <button type="button" class="item" data-i="${i}">
+        <div style="flex:1"><b>${esc(nameOf(d))}</b><span>${esc(clean(d.ENTP_NAME))}${ingredients(d).length ? ' · ' + esc(ingredients(d).slice(0,3).join(', ')) + (ingredients(d).length > 3 ? ' 외' : '') : ''}</span></div>
+        ${d.SPCLTY_PBLC ? `<span class="tag ${isRx(d) ? 'rx' : 'otc'}">${isRx(d) ? '전문' : '일반'}</span>` : ''}
+      </button>`).join('');
+    if (drugResults.length === 1) select(0);
+  } catch (e) { $('#drugs').innerHTML = `<div class="empty err">${esc(e.message)}</div>`; }
+}
+$('#f').addEventListener('submit', e => { e.preventDefault(); search($('#q').value); });
+$('#drugs').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) select(+b.dataset.i); });
+
+async function select(i) {
+  const d = drugResults[i]; current = d;
+  document.querySelectorAll('#drugs .item').forEach(b => b.classList.toggle('on', +b.dataset.i === i));
+  const ing = ingredients(d);
+  $('#detail').innerHTML = `
+    <article class="env" id="env">
+      <h3>${esc(nameOf(d))}</h3>
+      <p class="co">${esc(clean(d.ENTP_NAME))}${d.SPCLTY_PBLC ? ' · ' + esc(d.SPCLTY_PBLC) : ''}</p>
+      <div><b>성분</b>${ing.length ? `<div class="ingr">${ing.map(x => `<span>${esc(x)}</span>`).join('')}</div>` : '<p class="note">성분 정보가 없어요.</p>'}</div>
+      ${isRx(d) ? '<p class="warn">전문의약품이라 처방전이 있어야 살 수 있어요. 처방전을 받았다면 약국에 이 약이 있는지 전화로 먼저 물어보세요.</p>' : ''}
+      <div id="easy"></div>
+      ${ing.length ? '<div class="row"><button class="btn" id="sameBtn" type="button">같은 성분 제품 보기</button></div><div id="same" class="same"></div>' : ''}
+    </article>`;
+  drawScript();
+  if ($('#sameBtn')) $('#sameBtn').addEventListener('click', () => same(d));
+  if (window.innerWidth < 900) $('#env').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'});
+  if (!isRx(d) && d.ITEM_SEQ) {
+    $('#easy').innerHTML = '<p class="load note">효능·사용법 불러오는 중</p>';
+    try {
+      const j = await api({action: 'easy', seq: d.ITEM_SEQ});
+      if (current !== d) return;
+      const e = j.items[0];
+      if (!e) { $('#easy').innerHTML = ''; return; }
+      const parts = [['효능', 'EFCYQESITM'], ['먹는 법', 'USEMETHODQESITM'], ['꼭 알아둘 경고', 'ATPNWARNQESITM'], ['주의사항', 'ATPNQESITM'], ['같이 먹으면 안 되는 것', 'INTRCQESITM'], ['부작용', 'SEQESITM'], ['보관법', 'DEPOSITMETHODQESITM']];
+      const img = e.ITEMIMAGE && /^https?:\/\//.test(e.ITEMIMAGE) ? `<img class="pill" src="${esc(e.ITEMIMAGE)}" alt="${esc(nameOf(d))} 낱알 사진" loading="lazy">` : '';
+      $('#easy').innerHTML = `<div style="margin-top:14px">${img}` + parts.filter(([, k]) => clean(e[k])).map(([t, k], n) =>
+        `<details${n === 0 ? ' open' : ''}><summary>${t}</summary><p>${esc(clean(e[k]))}</p></details>`).join('') + '</div>';
+    } catch (err) { if (current === d) $('#easy').innerHTML = ''; }
+  }
+}
+
+/* ---------- 같은 성분 ---------- */
+async function same(d) {
+  const ing = ingredients(d); const box = $('#same');
+  box.innerHTML = '<p class="load note">같은 성분 제품 찾는 중</p>';
+  try {
+    const j = await api({action: 'ingr', q: ing[0]});
+    const key = ing.slice().sort().join('|');
+    const rows = j.items.filter(alive).filter(x => x.ITEM_SEQ !== d.ITEM_SEQ);
+    const exact = rows.filter(x => ingredients(x).sort().join('|') === key);
+    const mixed = rows.filter(x => !exact.includes(x));
+    const card = x => `<div class="item"><div style="flex:1"><b>${esc(nameOf(x))}</b><span>${esc(clean(x.ENTP_NAME))}</span></div>${x.SPCLTY_PBLC ? `<span class="tag ${isRx(x) ? 'rx' : 'otc'}">${isRx(x) ? '전문' : '일반'}</span>` : ''}</div>`;
+    let h = '';
+    h += `<p><b>성분 구성이 같은 제품 ${exact.length}개</b></p>`;
+    h += exact.length ? `<div class="list">${exact.slice(0, 30).map(card).join('')}</div>` : '<p class="note">성분 구성이 똑같은 다른 제품을 찾지 못했어요.</p>';
+    if (mixed.length) h += `<details><summary>${esc(ing[0])} 성분이 들어간 다른 제품(복합제 등) ${mixed.length}개</summary><div class="list" style="margin-top:8px">${mixed.slice(0, 40).map(card).join('')}</div></details>`;
+    h += '<p class="note">성분이 같아도 함량이나 제형(정·캡슐·시럽)이 다를 수 있어요. 바꿔 사기 전에 약사에게 꼭 확인하세요.</p>';
+    box.innerHTML = h;
+  } catch (e) { box.innerHTML = `<p class="err">${esc(e.message)}</p>`; }
+}
+
+/* ---------- 전화 대본 ---------- */
+function drawScript() {
+  if (!current) { $('#script').innerHTML = ''; return; }
+  const n = shortName(nameOf(current)); const ing = ingredients(current);
+  const text = `안녕하세요, ${n} 있나요?` + (ing.length && !isRx(current) ? ` 없으면 같은 성분(${ing.slice(0, 2).join(', ')}) 제품도 괜찮아요.` : '');
+  $('#script').innerHTML = `<div class="script">전화로 이렇게 물어보세요<br><q>${esc(text)}</q><div class="row" style="margin-top:8px"><button class="btn" type="button" id="cp">문장 복사</button></div></div>`;
+  $('#cp').addEventListener('click', async e => { try { await navigator.clipboard.writeText(text); e.target.textContent = '복사했어요'; } catch (er) { e.target.textContent = '복사가 안 돼요'; } });
+}
+
+/* ---------- 영업 여부 ---------- */
+const toMin = t => { t = String(t || '').replace(/\D/g, ''); if (t.length < 3) return null; t = t.padStart(4, '0'); return +t.slice(0, 2) * 60 + +t.slice(2); };
+const fmt = t => { t = String(t || '').replace(/\D/g, ''); if (t.length < 3) return ''; t = t.padStart(4, '0'); return t.slice(0, 2) + ':' + t.slice(2); };
+function openNow(s, c) {
+  const a = toMin(s), b = toMin(c); if (a === null || b === null) return null;
+  const now = new Date(); const m = now.getHours() * 60 + now.getMinutes();
+  if (b > a) return m >= a && m < b;
+  return m >= a || m < b; // 자정 넘기는 곳
+}
+const todayQT = () => { const d = new Date().getDay(); return d === 0 ? 7 : d; };
+
+function drawPh() {
+  const only = $('#onlyOpen').checked;
+  const list = pharmacies.filter(p => !only || p._open === true);
+  if (!pharmacies.length) { $('#phs').innerHTML = '<div class="empty">근처에서 약국을 찾지 못했어요.</div>'; return; }
+  if (!list.length) { $('#phs').innerHTML = `<div class="empty">지금 영업 중으로 등록된 약국이 없어요. 위의 체크를 끄면 전체 ${pharmacies.length}곳을 볼 수 있어요.</div>`; return; }
+  $('#phs').innerHTML = list.map(p => {
+    const tel = clean(p.DUTYTEL1); const telHref = tel.replace(/[^\d]/g, '');
+    const map = 'https://map.naver.com/p/search/' + encodeURIComponent(clean(p.DUTYNAME) + ' ' + clean(p.DUTYADDR));
+    const st = p._open === true ? '<span class="tag open">영업 중</span>' : p._open === false ? '<span class="tag closed">영업 종료</span>' : '<span class="tag closed">시간 정보 없음</span>';
+    return `<div class="ph"><div class="top"><b>${esc(clean(p.DUTYNAME))}</b>${st}</div>
+      <div class="addr">${esc(clean(p.DUTYADDR))}</div>
+      <div class="meta">${p._dist ? `<span>${esc(p._dist)}</span>` : ''}${p._hours ? `<span>오늘 ${esc(p._hours)}</span>` : ''}</div>
+      <div class="acts">${tel ? `<a class="btn red" href="tel:${esc(telHref)}">전화 ${esc(tel)}</a>` : ''}<a class="btn" href="${esc(map)}" target="_blank" rel="noopener">지도 보기</a></div></div>`;
+  }).join('');
+}
+$('#onlyOpen').addEventListener('change', drawPh);
+
+function prepNear(items) {
+  return items.map(p => {
+    const km = parseFloat(p.DISTANCE);
+    p._dist = isNaN(km) ? '' : km < 1 ? Math.round(km * 1000) + 'm' : km.toFixed(1) + 'km';
+    p._km = isNaN(km) ? 99 : km;
+    p._open = openNow(p.STARTTIME, p.ENDTIME);
+    p._hours = fmt(p.STARTTIME) && fmt(p.ENDTIME) ? fmt(p.STARTTIME) + '~' + fmt(p.ENDTIME) : '';
+    return p;
+  }).sort((a, b) => a._km - b._km);
+}
+function prepArea(items, qt) {
+  return items.map(p => {
+    const s = p['DUTYTIME' + qt + 'S'], c = p['DUTYTIME' + qt + 'C'];
+    p._open = openNow(s, c); p._dist = '';
+    p._hours = fmt(s) && fmt(c) ? fmt(s) + '~' + fmt(c) : '';
+    return p;
+  }).sort((a, b) => (b._open === true) - (a._open === true));
+}
+
+$('#geo').addEventListener('click', () => {
+  if (!navigator.geolocation) { $('#phs').innerHTML = '<div class="empty err">이 브라우저는 위치 찾기를 지원하지 않아요. 지역으로 찾아 주세요.</div>'; return; }
+  $('#phs').innerHTML = '<div class="load">위치 확인 중</div>';
+  navigator.geolocation.getCurrentPosition(async pos => {
+    $('#phs').innerHTML = '<div class="load">주변 약국 찾는 중</div>';
+    try {
+      const j = await api({action: 'near', lat: pos.coords.latitude, lon: pos.coords.longitude});
+      pharmacies = prepNear(j.items); lastPhMode = 'near'; drawPh();
+    } catch (e) { $('#phs').innerHTML = `<div class="empty err">${esc(e.message)}</div>`; }
+  }, err => {
+    $('#phs').innerHTML = `<div class="empty err">${err.code === 1 ? '위치 권한이 꺼져 있어요. 브라우저 설정에서 허용하거나 아래에 지역을 입력해 주세요.' : '위치를 확인하지 못했어요. 지역으로 찾아 주세요.'}</div>`;
+  }, {enableHighAccuracy: true, timeout: 10000, maximumAge: 120000});
+});
+
+$('#af').addEventListener('submit', async e => {
+  e.preventDefault();
+  const sido = $('#sido').value.trim(), gu = $('#gu').value.trim();
+  if (!sido) { $('#sido').focus(); return; }
+  store.set('yak_area', {sido, gu});
+  $('#phs').innerHTML = '<div class="load">약국 찾는 중</div>';
+  try {
+    const qt = todayQT();
+    const j = await api({action: 'area', sido, gu, qt});
+    pharmacies = prepArea(j.items, qt); lastPhMode = 'area'; drawPh();
+  } catch (er) { $('#phs').innerHTML = `<div class="empty err">${esc(er.message)}</div>`; }
+});
+
+const a = store.get('yak_area', null); if (a) { $('#sido').value = a.sido || ''; $('#gu').value = a.gu || ''; }
+drawRecent();
+}
+</script>
+</body>
+</html>
