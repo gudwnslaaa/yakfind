@@ -52,7 +52,7 @@ h2 small{font:400 14px "Noto Sans KR";color:var(--mute)}
 .item span{color:var(--mute);font-size:14px}
 .tag{display:inline-block;font-size:13px;font-weight:600;border-radius:6px;padding:1px 8px;white-space:nowrap;flex:none}
 .tag.rx{background:var(--redbg);color:var(--red)}.tag.otc{background:var(--okbg);color:var(--ok)}
-.tag.open{background:var(--okbg);color:var(--ok)}.tag.closed{background:var(--paper);color:var(--mute)}
+.tag.open{background:var(--okbg);color:var(--ok)}.tag.soon{background:light-dark(#fff1d6,#3a2e14);color:light-dark(#8a5a00,#f3c96b)}.tag.closed{background:var(--paper);color:var(--mute)}
 .env{background:var(--paper);border-radius:18px;padding:clamp(18px,3vw,28px);margin-top:18px;border-top:6px solid var(--red)}
 .env h3{font-size:clamp(22px,3vw,30px);font-weight:800}
 .env .co{color:var(--mute);margin:4px 0 14px}
@@ -162,11 +162,20 @@ async function api(params) {
 }
 
 /* ---------- 성분 정리 ---------- */
+// 성분 이름은 영어로 옴: "Acetaminophen Granules", "Acetaminophen/Acetaminophen" 등
+// 비교용으로 제형·수화물 단어를 떼고, 같은 성분이 두 번 나오면 하나로 합침
+const FORM_WORDS = /\b(granules?|micronized|powder|coated|encapsulated|fine|direct compression|dc|anhydrous|hydrate|monohydrate|dihydrate|trihydrate|sesquihydrate)\b/gi;
+const ingrKey = s => s.toLowerCase().replace(FORM_WORDS, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
 function ingredients(d) {
-  const raw = pick(d, 'ITEM_INGR_NAME', 'MAIN_ITEM_INGR', 'MAIN_INGR_ENG') ;
-  const list = raw.replace(/\[[A-Z]?\d+\]/g, '').split(/[\/|,;]+/).map(s => s.trim()).filter(Boolean);
-  return [...new Set(list)];
+  const raw = pick(d, 'ITEM_INGR_NAME', 'MAIN_ITEM_INGR', 'MAIN_INGR_ENG');
+  const seen = new Map();
+  for (const part of raw.replace(/\[[A-Z]?\d+\]/g, '').split(/[\/|;]+/)) {
+    const name = part.trim(); if (/^as\b/i.test(name)) continue; const k = ingrKey(name);
+    if (k && !seen.has(k)) seen.set(k, name.replace(FORM_WORDS, '').replace(/\s+/g, ' ').trim() || name);
+  }
+  return [...seen.values()];
 }
+const ingrSet = d => [...new Set(ingredients(d).map(ingrKey))].sort().join('|');
 const isRx = d => /전문/.test(d.SPCLTY_PBLC || '');
 const alive = d => !/취소|취하|폐지/.test(d.CANCEL_NAME || '');
 const nameOf = d => clean(pick(d, 'ITEM_NAME', 'ITEMNAME'));
@@ -238,15 +247,17 @@ async function same(d) {
   box.innerHTML = '<p class="load note">같은 성분 제품 찾는 중</p>';
   try {
     const j = await api({action: 'ingr', q: ing[0]});
-    const key = ing.slice().sort().join('|');
+    const partial = j.total > j.items.length;
+    const key = ingrSet(d);
     const rows = j.items.filter(alive).filter(x => x.ITEM_SEQ !== d.ITEM_SEQ);
-    const exact = rows.filter(x => ingredients(x).sort().join('|') === key);
+    const exact = rows.filter(x => ingrSet(x) === key);
     const mixed = rows.filter(x => !exact.includes(x));
     const card = x => `<div class="item"><div style="flex:1"><b>${esc(nameOf(x))}</b><span>${esc(clean(x.ENTP_NAME))}</span></div>${x.SPCLTY_PBLC ? `<span class="tag ${isRx(x) ? 'rx' : 'otc'}">${isRx(x) ? '전문' : '일반'}</span>` : ''}</div>`;
     let h = '';
     h += `<p><b>성분 구성이 같은 제품 ${exact.length}개</b></p>`;
     h += exact.length ? `<div class="list">${exact.slice(0, 30).map(card).join('')}</div>` : '<p class="note">성분 구성이 똑같은 다른 제품을 찾지 못했어요.</p>';
     if (mixed.length) h += `<details><summary>${esc(ing[0])} 성분이 들어간 다른 제품(복합제 등) ${mixed.length}개</summary><div class="list" style="margin-top:8px">${mixed.slice(0, 40).map(card).join('')}</div></details>`;
+    if (partial) h += `<p class="note">이 성분이 들어간 제품이 ${j.total}개나 돼서 그중 ${j.items.length}개 안에서 찾았어요.</p>`;
     h += '<p class="note">성분이 같아도 함량이나 제형(정·캡슐·시럽)이 다를 수 있어요. 바꿔 사기 전에 약사에게 꼭 확인하세요.</p>';
     box.innerHTML = h;
   } catch (e) { box.innerHTML = `<p class="err">${esc(e.message)}</p>`; }
@@ -270,6 +281,13 @@ function openNow(s, c) {
   if (b > a) return m >= a && m < b;
   return m >= a || m < b; // 자정 넘기는 곳
 }
+// 마감까지 남은 분 (영업 중일 때만)
+function minsLeft(s, c) {
+  const a = toMin(s), b = toMin(c); if (a === null || b === null) return null;
+  const now = new Date(); const m = now.getHours() * 60 + now.getMinutes();
+  let left = b - m; if (left < 0) left += 1440;
+  return left;
+}
 const todayQT = () => { const d = new Date().getDay(); return d === 0 ? 7 : d; };
 
 function drawPh() {
@@ -279,12 +297,17 @@ function drawPh() {
   if (!list.length) { $('#phs').innerHTML = `<div class="empty">지금 영업 중으로 등록된 약국이 없어요. 위의 체크를 끄면 전체 ${pharmacies.length}곳을 볼 수 있어요.</div>`; return; }
   $('#phs').innerHTML = list.map(p => {
     const tel = clean(p.DUTYTEL1); const telHref = tel.replace(/[^\d]/g, '');
-    const map = 'https://map.naver.com/p/search/' + encodeURIComponent(clean(p.DUTYNAME) + ' ' + clean(p.DUTYADDR));
-    const st = p._open === true ? '<span class="tag open">영업 중</span>' : p._open === false ? '<span class="tag closed">영업 종료</span>' : '<span class="tag closed">시간 정보 없음</span>';
+    const lat = parseFloat(p.LATITUDE || p.WGS84LAT), lon = parseFloat(p.LONGITUDE || p.WGS84LON);
+    const nm = clean(p.DUTYNAME);
+    // 좌표가 있으면 카카오맵에 그 자리로 핀을 꽂아 열고, 없으면 이름+시·구로 네이버 검색
+    const area2 = clean(p.DUTYADDR).split(' ').slice(0, 2).join(' ');
+    const kakao = !isNaN(lat) && !isNaN(lon) ? `https://map.kakao.com/link/map/${encodeURIComponent(nm)},${lat},${lon}` : '';
+    const naver = 'https://map.naver.com/p/search/' + encodeURIComponent(nm + ' ' + area2);
+    const st = p._open === true ? (p._left !== null && p._left <= 30 ? `<span class="tag soon">곧 마감 · ${p._left}분 남음</span>` : '<span class="tag open">영업 중</span>') : p._open === false ? '<span class="tag closed">영업 종료</span>' : '<span class="tag closed">시간 정보 없음</span>';
     return `<div class="ph"><div class="top"><b>${esc(clean(p.DUTYNAME))}</b>${st}</div>
       <div class="addr">${esc(clean(p.DUTYADDR))}</div>
-      <div class="meta">${p._dist ? `<span>${esc(p._dist)}</span>` : ''}${p._hours ? `<span>오늘 ${esc(p._hours)}</span>` : ''}</div>
-      <div class="acts">${tel ? `<a class="btn red" href="tel:${esc(telHref)}">전화 ${esc(tel)}</a>` : ''}<a class="btn" href="${esc(map)}" target="_blank" rel="noopener">지도 보기</a></div></div>`;
+      <div class="meta">${p._dist ? `<span>${esc(p._dist)}</span>` : ''}${p._hours ? `<span>오늘 ${esc(p._hours)} (등록 기준)</span>` : ''}</div>
+      <div class="acts">${tel ? `<a class="btn red" href="tel:${esc(telHref)}">전화 ${esc(tel)}</a>` : ''}${kakao ? `<a class="btn" href="${esc(kakao)}" target="_blank" rel="noopener">지도 보기</a>` : ''}<a class="btn" href="${esc(naver)}" target="_blank" rel="noopener">네이버 지도</a></div></div>`;
   }).join('');
 }
 $('#onlyOpen').addEventListener('change', drawPh);
@@ -294,7 +317,7 @@ function prepNear(items) {
     const km = parseFloat(p.DISTANCE);
     p._dist = isNaN(km) ? '' : km < 1 ? Math.round(km * 1000) + 'm' : km.toFixed(1) + 'km';
     p._km = isNaN(km) ? 99 : km;
-    p._open = openNow(p.STARTTIME, p.ENDTIME);
+    p._open = openNow(p.STARTTIME, p.ENDTIME); p._left = p._open ? minsLeft(p.STARTTIME, p.ENDTIME) : null;
     p._hours = fmt(p.STARTTIME) && fmt(p.ENDTIME) ? fmt(p.STARTTIME) + '~' + fmt(p.ENDTIME) : '';
     return p;
   }).sort((a, b) => a._km - b._km);
@@ -302,7 +325,7 @@ function prepNear(items) {
 function prepArea(items, qt) {
   return items.map(p => {
     const s = p['DUTYTIME' + qt + 'S'], c = p['DUTYTIME' + qt + 'C'];
-    p._open = openNow(s, c); p._dist = '';
+    p._open = openNow(s, c); p._left = p._open ? minsLeft(s, c) : null; p._dist = '';
     p._hours = fmt(s) && fmt(c) ? fmt(s) + '~' + fmt(c) : '';
     return p;
   }).sort((a, b) => (b._open === true) - (a._open === true));
