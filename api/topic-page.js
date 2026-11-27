@@ -24,7 +24,7 @@ async function ingredientPage(res, raw) {
   const body = `
 <nav class="crumb"><a href="/ingredient">성분별 약</a> › ${esc(ko)}</nav>
 <h1>${esc(ko)} 들어간 약</h1>
-<p class="sub">${esc(ko)}${info ? ` (${esc(q)})` : ''} 성분이 들어간 약 ${d.total > d.items.length ? `${all.length}개 이상` : `${all.length}개`}를 모았어요. 일반의약품 ${nOtc}개, 이 성분 하나만 든 약 ${single.length}개, 다른 성분과 섞인 복합제 ${combo.length}개예요.</p>
+<p class="sub">${esc(ko)}${info ? ` (${esc(q)})` : ''} 성분이 들어간 약 ${d.total > d.items.length ? `${all.length}개 이상을` : `${all.length}개를`} 모았어요. 일반의약품 ${nOtc}개, 이 성분 하나만 든 약 ${single.length}개, 다른 성분과 섞인 복합제 ${combo.length}개예요.</p>
 <div class="box cta"><b>같은 성분은 겹쳐 먹지 마세요</b><p class="note" style="margin:6px 0 0">감기약·진통제·생리통약에 같은 성분이 함께 들어 있는 경우가 많아요. 두 가지 약을 같이 먹기 전에 아래 목록에 둘 다 있는지 확인하거나 <a href="/check">같이 먹어도 되나요?</a>에서 확인하세요.</p></div>
 ${single.length ? `<h2>${esc(ko)}만 든 약 <small class="note">${single.length}개</small></h2><ul class="list">${single.slice(0, 80).map(row).join('')}</ul>` : ''}
 ${combo.length ? `<h2>${esc(ko)}이(가) 들어간 복합제 <small class="note">${combo.length}개</small></h2><ul class="list">${combo.slice(0, 120).map(row).join('')}</ul>` : ''}
