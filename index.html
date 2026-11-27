@@ -16,7 +16,6 @@
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#d1291f">
-<meta name="naver-site-verification" content="00884e3b93bb91fbacc26d80ceca1d166e1251a6" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23d1291f'/%3E%3Ctext x='32' y='45' font-size='38' font-weight='800' text-anchor='middle' fill='white' font-family='sans-serif'%3E%EC%95%BD%3C/text%3E%3C/svg%3E">
 <script defer src="/_vercel/insights/script.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -78,6 +77,16 @@ details{border-top:1px solid var(--line);padding:10px 0}
 details:last-of-type{border-bottom:1px solid var(--line)}
 summary{cursor:pointer;font-weight:600;min-height:28px}
 details p{margin:8px 0 0;white-space:pre-line;font-size:15px}
+.thumb{flex:none;width:64px;height:44px;border-radius:8px;background:var(--paper);overflow:hidden;display:grid;place-items:center;align-self:center}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb.none::before,.thumb:empty::before{content:"";width:26px;height:12px;border-radius:6px;background:linear-gradient(90deg,var(--line) 50%,var(--mute) 50%);opacity:.6}
+.photo{margin:4px 0 14px;border-radius:14px;overflow:hidden;background:var(--bg);border:1px solid var(--line);cursor:zoom-in;padding:0;display:block;width:100%}
+.photo img{width:100%;aspect-ratio:780/426;object-fit:cover;display:block}
+.cap{font-size:13px;color:var(--mute);margin:-8px 0 14px}
+dialog.lb{border:0;padding:0;background:transparent;max-width:min(92vw,900px)}
+dialog.lb::backdrop{background:rgba(0,0,0,.8)}
+dialog.lb img{width:100%;border-radius:12px;display:block;background:#fff}
+dialog.lb p{color:#fff;text-align:center;margin:10px 0 0;font-size:15px}
 .pill{width:84px;height:84px;border-radius:12px;object-fit:cover;background:var(--bg);float:right;margin:0 0 10px 14px}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .same{margin-top:14px}
@@ -172,6 +181,7 @@ footer p{margin:4px 0;max-width:80ch}
   </div>
 </main>
 
+<dialog class="lb" id="lb"><img id="lbImg" alt=""><p id="lbCap"></p></dialog>
 <footer class="band">
   <div class="wrap">
     <p>약 정보: 식품의약품안전처 의약품 제품 허가정보·의약품개요정보(e약은요). 약국 정보: 국립중앙의료원 전국 약국 정보. 공공데이터포털(data.go.kr) 제공.</p>
@@ -221,6 +231,8 @@ const showIngr = n => koName(n) ? `${koName(n)} (${n})` : n;
 // 같은 성분을 찾을 때, 흔한 성분(아세트아미노펜 등)보다 드문 성분으로 검색해야 결과가 적고 정확함
 const COMMON = new Set(['acetaminophen','caffeine','ibuprofen','chlorpheniramine maleate','ascorbic acid','thiamine nitrate','riboflavin','magnesium oxide','pyridoxine hydrochloride']);
 const queryIngr = ing => ing.find(x => !COMMON.has(ingrKey(x))) || ing[0];
+const imgOf = d => { const u = String(d.BIG_PRDT_IMG_URL || d.ITEMIMAGE || '').trim(); return /^https?:\/\//.test(u) ? u.replace(/^http:/, 'https:') : ''; };
+const thumb = d => { const u = imgOf(d); return `<span class="thumb">${u ? `<img src="${esc(u)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('none');this.remove()">` : ''}</span>`; };
 const isRx = d => /전문/.test(d.SPCLTY_PBLC || '');
 const alive = d => !/취소|취하|폐지/.test(d.CANCEL_NAME || '') && !/수출용/.test(d.ITEM_NAME || '');
 const nameOf = d => clean(pick(d, 'ITEM_NAME', 'ITEMNAME'));
@@ -248,21 +260,30 @@ async function search(q) {
     if (!drugResults.length) { $('#drugs').innerHTML = '<div class="empty">검색 결과가 없어요. 띄어쓰기를 빼거나 제품명 일부만 넣어 보세요.</div>'; return; }
     $('#drugs').innerHTML = drugResults.map((d, i) => `
       <button type="button" class="item" data-i="${i}">
-        <div style="flex:1"><b>${esc(nameOf(d))}</b><span>${esc(clean(d.ENTP_NAME))}${ingredients(d).length ? ' · ' + esc(ingredients(d).slice(0,3).map(x => koName(x) || x).join(', ')) + (ingredients(d).length > 3 ? ' 외' : '') : ''}</span></div>
+        ${thumb(d)}<div style="flex:1"><b>${esc(nameOf(d))}</b><span>${esc(clean(d.ENTP_NAME))}${ingredients(d).length ? ' · ' + esc(ingredients(d).slice(0,3).map(x => koName(x) || x).join(', ')) + (ingredients(d).length > 3 ? ' 외' : '') : ''}</span></div>
         ${d.SPCLTY_PBLC ? `<span class="tag ${isRx(d) ? 'rx' : 'otc'}">${isRx(d) ? '전문' : '일반'}</span>` : ''}
       </button>`).join('');
     if (drugResults.length === 1) select(0);
   } catch (e) { $('#drugs').innerHTML = `<div class="empty err">${esc(e.message)}</div>`; }
 }
+document.addEventListener('click', e => {
+  const z = e.target.closest('[data-zoom]');
+  if (z) { $('#lbImg').src = z.dataset.zoom; $('#lbImg').alt = z.dataset.name + ' 사진'; $('#lbCap').textContent = z.dataset.name + ' · 아무 곳이나 누르면 닫혀요'; try { $('#lb').showModal(); } catch (er) { window.open(z.dataset.zoom, '_blank'); } return; }
+  if (e.target.closest('#lb')) $('#lb').close();
+});
 $('#f').addEventListener('submit', e => { e.preventDefault(); search($('#q').value); });
 $('#drugs').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) select(+b.dataset.i); });
 
+function photoHtml(u, name) {
+  return `<button type="button" class="photo" data-zoom="${esc(u)}" data-name="${esc(name)}" aria-label="${esc(name)} 사진 크게 보기"><img src="${esc(u)}" alt="${esc(name)} 낱알 사진" onerror="this.closest('#photo').innerHTML=''"></button><p class="cap">식약처 제공 낱알 사진 · 눌러서 크게 보기 · 포장이나 색은 실제와 다를 수 있어요</p>`;
+}
 async function select(i) {
   const d = drugResults[i]; current = d;
   document.querySelectorAll('#drugs .item').forEach(b => b.classList.toggle('on', +b.dataset.i === i));
   const ing = ingredients(d);
   $('#detail').innerHTML = `
     <article class="env" id="env">
+      <div id="photo">${imgOf(d) ? photoHtml(imgOf(d), nameOf(d)) : ''}</div>
       <h3>${esc(nameOf(d))}</h3>
       <p class="co">${esc(clean(d.ENTP_NAME))}${d.SPCLTY_PBLC ? ' · ' + esc(d.SPCLTY_PBLC) : ''}</p>
       <div><b>성분</b>${ing.length ? `<div class="ingr">${ing.map(x => `<span>${esc(showIngr(x))}</span>`).join('')}</div>` : '<p class="note">성분 정보가 없어요.</p>'}</div>
@@ -281,8 +302,9 @@ async function select(i) {
       const e = j.items[0];
       if (!e) { $('#easy').innerHTML = ''; return; }
       const parts = [['효능', 'EFCYQESITM'], ['먹는 법', 'USEMETHODQESITM'], ['꼭 알아둘 경고', 'ATPNWARNQESITM'], ['주의사항', 'ATPNQESITM'], ['같이 먹으면 안 되는 것', 'INTRCQESITM'], ['부작용', 'SEQESITM'], ['보관법', 'DEPOSITMETHODQESITM']];
-      const img = e.ITEMIMAGE && /^https?:\/\//.test(e.ITEMIMAGE) ? `<img class="pill" src="${esc(e.ITEMIMAGE)}" alt="${esc(nameOf(d))} 낱알 사진" loading="lazy">` : '';
-      $('#easy').innerHTML = `<div style="margin-top:14px">${img}` + parts.filter(([, k]) => clean(e[k])).map(([t, k], n) =>
+      const ei = imgOf({ITEMIMAGE: e.ITEMIMAGE});
+      if (ei && !$('#photo').innerHTML) $('#photo').innerHTML = photoHtml(ei, nameOf(d));
+      $('#easy').innerHTML = `<div style="margin-top:14px">` + parts.filter(([, k]) => clean(e[k])).map(([t, k], n) =>
         `<details${n === 0 ? ' open' : ''}><summary>${t}</summary><p>${esc(clean(e[k]))}</p></details>`).join('') + '</div>';
     } catch (err) { if (current === d) $('#easy').innerHTML = ''; }
   }
@@ -300,7 +322,7 @@ async function same(d) {
     const rows = j.items.filter(alive).filter(x => x.ITEM_SEQ !== d.ITEM_SEQ);
     const exact = rows.filter(x => ingrSet(x) === key);
     const mixed = rows.filter(x => !exact.includes(x));
-    const card = x => `<div class="item"><div style="flex:1"><b>${esc(nameOf(x))}</b><span>${esc(clean(x.ENTP_NAME))}</span></div>${x.SPCLTY_PBLC ? `<span class="tag ${isRx(x) ? 'rx' : 'otc'}">${isRx(x) ? '전문' : '일반'}</span>` : ''}</div>`;
+    const card = x => `<div class="item">${thumb(x)}<div style="flex:1"><b>${esc(nameOf(x))}</b><span>${esc(clean(x.ENTP_NAME))}</span></div>${x.SPCLTY_PBLC ? `<span class="tag ${isRx(x) ? 'rx' : 'otc'}">${isRx(x) ? '전문' : '일반'}</span>` : ''}</div>`;
     let h = '';
     h += `<p><b>성분 구성이 같은 제품 ${exact.length}개</b></p>`;
     h += exact.length ? `<div class="list">${exact.slice(0, 30).map(card).join('')}</div>` : '<p class="note">성분 구성이 똑같은 다른 제품을 찾지 못했어요.</p>';
