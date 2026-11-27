@@ -20,9 +20,32 @@
     },
     "api/dur-check.js": {
       "maxDuration": 30
+    },
+    "api/topic-page.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
+    {
+      "source": "/symptom/:name",
+      "destination": "/api/topic-page?type=symptom&name=:name"
+    },
+    {
+      "source": "/symptom",
+      "destination": "/api/topic-page?type=symptom"
+    },
+    {
+      "source": "/ingredient/:name",
+      "destination": "/api/topic-page?type=ingredient&name=:name"
+    },
+    {
+      "source": "/ingredient",
+      "destination": "/api/topic-page?type=ingredient"
+    },
+    {
+      "source": "/disposal",
+      "destination": "/disposal.html"
+    },
     {
       "source": "/pill",
       "destination": "/pill.html"

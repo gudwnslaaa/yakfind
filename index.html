@@ -168,6 +168,10 @@ footer p{margin:4px 0;max-width:80ch}
       <a href="/pill"><b>이 알약 무슨 약?</b><span>글자·모양·색으로 찾기</span></a>
       <a href="/pharmacy"><b>일요일·공휴일 약국</b><span>우리 동네 요일별 영업시간</span></a>
       <a href="/convenience"><b>편의점 상비약</b><span>약국이 다 닫았을 때</span></a>
+      <a href="/ingredient"><b>성분별 약</b><span>같은 성분 든 약 전체</span></a>
+      <a href="/symptom"><b>증상별 약</b><span>두통·감기·소화불량 등</span></a>
+      <a href="/disposal"><b>남은 약 버리는 법</b><span>수거함·우체통·보관법</span></a>
+      <a href="/pharmacy"><b>지역별 약국</b><span>시·군·구 전체 영업시간</span></a>
     </nav>
   </div>
 </header>
@@ -289,7 +293,7 @@ async function symptom(key, label) {
     const list = j.items.filter(x => !/수출용/.test(x.ITEMNAME || ''));
     $('#cnt').textContent = j.total > list.length ? `${j.total}개 중 ${list.length}개` : `${list.length}개`;
     if (!list.length) { $('#drugs').innerHTML = '<div class="empty">해당하는 약을 찾지 못했어요.</div>'; return; }
-    $('#drugs').innerHTML = `<p class="symnote">효능에 '${esc(key)}'이(가) 적힌 일반의약품이에요. 증상이 심하거나 오래가면 약사·의사와 상담하세요.</p>` + list.map(x => `
+    $('#drugs').innerHTML = `<p class="symnote">효능에 '${esc(key)}'이(가) 적힌 일반의약품이에요. 증상이 심하거나 오래가면 약사·의사와 상담하세요. <a href="/symptom/${encodeURIComponent(key)}">전체 목록 페이지로 보기 →</a></p>` + list.map(x => `
       <a class="item" style="text-decoration:none" href="/drug/${esc(x.ITEMSEQ)}">${thumb({ITEMIMAGE: x.ITEMIMAGE})}<div style="flex:1"><b>${esc(clean(x.ITEMNAME))}</b><span>${esc(clean(x.ENTPNAME))} · ${esc(clean(x.EFCYQESITM).slice(0, 60))}…</span></div><span class="tag otc">일반</span></a>`).join('');
   } catch (e) { $('#drugs').innerHTML = `<div class="empty err">${esc(e.message)}</div>`; }
 }
