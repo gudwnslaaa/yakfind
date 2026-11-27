@@ -1,34 +1,49 @@
 // /drug/품목기준코드 → 약 상세 페이지 (검색엔진이 읽을 수 있게 서버에서 완성)
 import { call, callAll, esc, clean, ingredients, ingrSet, koName, showIngr, queryIngr, isRx, alive, imgOf, shortName,
-  page, sendHtml, notFound, failPage, getQuery } from './_lib.js';
+  page, sendHtml, notFound, failPage, getQuery, findPermit, durFor, groupTaboo, durText, nz } from './_lib.js';
 
-async function findPermit(seq) {
-  // 1) 품목코드로 바로 조회
-  try {
-    const d = await call('permit', { item_seq: seq, numOfRows: 5, type: 'json' });
-    const hit = d.items.find(x => x.ITEM_SEQ === seq);
-    if (hit) return hit;
-  } catch (e) { /* 아래 방법으로 */ }
-  // 2) e약은요에서 이름을 얻어 이름으로 조회
-  const e = await call('easy', { itemSeq: seq, numOfRows: 1, type: 'json' }).catch(() => null);
-  const name = e && e.items[0] && e.items[0].ITEMNAME;
-  if (!name) return null;
-  const d = await call('permit', { item_name: shortName(name).slice(0, 30), numOfRows: 100, type: 'json' });
-  return d.items.find(x => x.ITEM_SEQ === seq) || null;
+const DUR_INFO = {
+  임부금기: ['임신 중에는 먹으면 안 돼요', '임신했거나 임신 가능성이 있으면 의사·약사와 먼저 상의하세요.'],
+  특정연령대금기: ['특정 나이에서는 먹으면 안 돼요', '주로 어린이에게 해당해요. 나이 기준은 약사에게 확인하세요.'],
+  노인주의: ['어르신은 주의가 필요해요', '65세 이상은 부작용이 더 잘 생길 수 있어요.'],
+  용량주의: ['하루 최대 용량을 넘기지 마세요', '같은 성분이 든 다른 약과 겹치지 않게 주의하세요.'],
+  투여기간주의: ['오래 먹으면 안 되는 약이에요', '정해진 기간보다 오래 먹지 마세요.'],
+  효능군중복: ['같은 종류 약을 겹쳐 먹지 마세요', '효능이 같은 약을 함께 먹으면 부작용 위험이 커져요.'],
+  서방정분할주의: ['쪼개거나 씹어 먹지 마세요', '천천히 녹도록 만든 약이라 통째로 삼켜야 해요.'],
+};
+function durHtml(dur) {
+  if (!dur) return '';
+  const order = ['임부금기', '특정연령대금기', '노인주의', '용량주의', '투여기간주의', '효능군중복', '서방정분할주의'];
+  const blocks = order.filter(t => dur.rows[t]).map(t => {
+    const r = dur.rows[t]; const [head, sub] = DUR_INFO[t];
+    const txt = [...new Set(r.map(durText).filter(Boolean))].slice(0, 3).join(' / ');
+    const extra = t === '효능군중복' ? [...new Set(r.map(x => nz(x.EFFECT_NAME) || nz(x.SERS_NAME)).filter(Boolean))].join(', ') : [...new Set(r.map(x => nz(x.INGR_NAME) || nz(x.INGR_KOR_NAME)).filter(Boolean))].join(', ');
+    return `<li class="dur"><b>⚠ ${esc(head)}</b><small>${esc(sub)}${extra ? ` · 해당 성분·분류: ${esc(extra)}` : ''}${txt ? `<br>${esc(txt)}` : ''}</small></li>`;
+  });
+  const taboo = dur.rows['병용금기'] ? groupTaboo(dur.rows['병용금기']) : [];
+  if (!blocks.length && !taboo.length) return `<h2>먹을 때 주의할 점</h2><p class="note">식약처 DUR(의약품 안전사용 정보)에 등록된 금기·주의 사항이 없어요. 그래도 다른 약과 함께 먹을 땐 약사에게 물어보세요.</p>`;
+  return `<h2>먹을 때 주의할 점 <small class="note">식약처 DUR</small></h2>
+${blocks.length ? `<ul class="list">${blocks.join('')}</ul>` : ''}
+${taboo.length ? `<h3 style="margin-top:18px">같이 먹으면 안 되는 성분 ${taboo.length}가지</h3>
+<ul class="list">${taboo.slice(0, 30).map(g => `<li class="dur"><b>${esc(g.ingr)}</b><small>${g.why ? esc(g.why) : ''}${g.items.length ? `<br>예: ${g.items.map(x => x.seq ? `<a href="/drug/${esc(x.seq)}">${esc(x.name)}</a>` : esc(x.name)).join(', ')}` : ''}</small></li>`).join('')}</ul>
+${taboo.length > 30 ? `<p class="note">외 ${taboo.length - 30}가지가 더 있어요.</p>` : ''}` : ''}
+<p class="note"><a href="/check">먹고 있는 다른 약과 같이 먹어도 되는지 확인하기 →</a></p>`;
 }
 
 export default async function handler(req, res) {
   const seq = String(getQuery(req).seq || '').replace(/\D/g, '').slice(0, 12);
   if (!seq) return notFound(res, '품목코드가 없어요.');
-  let d, easy = null, same = [];
+  let d, easy = null, same = [], dur = null;
   try {
     d = await findPermit(seq);
     if (!d) return notFound(res, '이 품목코드의 약을 찾지 못했어요. 허가가 취소됐거나 주소가 잘못됐을 수 있어요.');
     const ing = ingredients(d);
-    const [e, s] = await Promise.all([
+    const [e, s, du] = await Promise.all([
       isRx(d) ? null : call('easy', { itemSeq: seq, numOfRows: 1, type: 'json' }).catch(() => null),
       ing.length ? callAll('permit', { item_ingr_name: queryIngr(ing), type: 'json' }, 100, 5, 5).catch(() => null) : null,
+      durFor(seq).catch(() => null),
     ]);
+    dur = du;
     easy = e && e.items[0] || null;
     if (s) {
       const key = ingrSet(d);
@@ -66,6 +81,8 @@ ${rx ? '<p class="box">전문의약품이라 처방전이 있어야 살 수 있�
 </div>
 
 ${easy ? `<h2>효능과 먹는 법</h2>` + parts.filter(([, k]) => clean(easy[k])).map(([t, k]) => `<section class="sec"><h3>${t}</h3><p>${esc(clean(easy[k]))}</p></section>`).join('<br>') : ''}
+
+${durHtml(dur)}
 
 <h2>같은 성분 제품 ${same.length ? `<small class="note">${same.length}개</small>` : ''}</h2>
 ${same.length ? `<ul class="list">${same.slice(0, 40).map(x => `<li><a class="it" href="/drug/${esc(x.ITEM_SEQ)}">${thumb(x)}<span><b>${esc(clean(x.ITEM_NAME))}</b><small>${esc(clean(x.ENTP_NAME))} · ${isRx(x) ? '전문' : '일반'}</small></span></a></li>`).join('')}</ul>

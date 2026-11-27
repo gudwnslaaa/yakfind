@@ -7,7 +7,18 @@ export const ROUTES = {
   permit: '/1471000/DrugPrdtPrmsnInfoService08/getDrugPrdtPrmsnInq08',
   easy: '/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList',
   area: '/B552657/ErmctInsttInfoInqireService/getParmacyListInfoInqire',
+  pill: '/1471000/MdcinGrnIdntfcInfoService03/getMdcinGrnIdntfcInfoList03',
+  durList: '/1471000/DURPrdlstInfoService03/getDurPrdlstInfoList03',
+  dur_병용금기: '/1471000/DURPrdlstInfoService03/getUsjntTabooInfoList03',
+  dur_특정연령대금기: '/1471000/DURPrdlstInfoService03/getSpcifyAgrdeTabooInfoList03',
+  dur_임부금기: '/1471000/DURPrdlstInfoService03/getPwnmTabooInfoList03',
+  dur_용량주의: '/1471000/DURPrdlstInfoService03/getCpctyAtentInfoList03',
+  dur_투여기간주의: '/1471000/DURPrdlstInfoService03/getMdctnPdAtentInfoList03',
+  dur_노인주의: '/1471000/DURPrdlstInfoService03/getOdsnAtentInfoList03',
+  dur_효능군중복: '/1471000/DURPrdlstInfoService03/getEfcyDplctInfoList03',
+  dur_서방정분할주의: '/1471000/DURPrdlstInfoService03/getSeobangjeongPartitnAtentInfoList03',
 };
+export const DUR_TYPES = ['병용금기', '특정연령대금기', '임부금기', '노인주의', '용량주의', '투여기간주의', '효능군중복', '서방정분할주의'];
 
 const unxml = s => s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
   .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
@@ -30,7 +41,7 @@ function parseJson(j) {
   if (items && !Array.isArray(items) && items.item) items = items.item;
   if (items && !Array.isArray(items)) items = [items];
   items = (items || []).filter(x => x && typeof x === 'object').map(x => {
-    const r = {}; for (const [k, v] of Object.entries(x)) r[k.toUpperCase()] = v == null || typeof v === 'object' ? '' : String(v); return r;
+    const r = {}; for (const [k, v] of Object.entries(x)) r[k.trim().toUpperCase()] = v == null || typeof v === 'object' || v === 'null' ? '' : String(v); return r;
   });
   return { gateway: '', code: String(h.resultCode ?? '00'), total: Number(b.totalCount) || items.length, items };
 }
@@ -87,6 +98,57 @@ export const isRx = d => /전문/.test(d.SPCLTY_PBLC || '');
 export const alive = d => !/취소|취하|폐지/.test(d.CANCEL_NAME || '') && !/수출용/.test(d.ITEM_NAME || '');
 export const imgOf = d => { const u = String(d.BIG_PRDT_IMG_URL || d.ITEMIMAGE || '').trim(); return /^https?:\/\//.test(u) ? u.replace(/^http:/, 'https:') : ''; };
 export const shortName = n => clean(n).replace(/\(.*?\)/g, '').trim();
+
+// ---- 품목 찾기 (품목코드 → 허가정보) ----
+export async function findPermit(seq) {
+  try {
+    const d = await call('permit', { item_seq: seq, numOfRows: 5, type: 'json' });
+    const hit = d.items.find(x => x.ITEM_SEQ === seq);
+    if (hit) return hit;
+  } catch (e) { /* 아래 방법으로 */ }
+  const e = await call('easy', { itemSeq: seq, numOfRows: 1, type: 'json' }).catch(() => null);
+  const name = e && e.items[0] && e.items[0].ITEMNAME;
+  if (!name) return null;
+  const d = await call('permit', { item_name: shortName(name).slice(0, 30), numOfRows: 100, type: 'json' });
+  return d.items.find(x => x.ITEM_SEQ === seq) || null;
+}
+
+// ---- DUR (의약품 안전사용 정보) ----
+const nz = v => { v = clean(v).replace(/^["'\-\s]+|["'\s]+$/g, ''); return v && v !== 'null' ? v : ''; };
+// 품목코드 하나의 DUR 정보 → { types: [...], rows: {유형: [행...]} }
+export async function durFor(seq) {
+  let types = null;
+  try {
+    const d = await call('durList', { itemSeq: seq, numOfRows: 20, type: 'json' });
+    if (d.total <= 50) {
+      types = new Set();
+      for (const r of d.items) if (r.ITEM_SEQ === seq) for (const t of String(r.TYPE_NAME || '').split(/[,/]/)) { const k = t.trim().replace(/\s/g, ''); if (k) types.add(k); }
+    }
+  } catch (e) { /* 아래에서 전부 조회 */ }
+  const want = types ? DUR_TYPES.filter(t => types.has(t)) : DUR_TYPES;
+  const rows = {};
+  await Promise.all(want.map(async t => {
+    try {
+      const d = t === '병용금기' ? await callAll('dur_' + t, { itemSeq: seq, type: 'json' }, 100, 5, 5) : await call('dur_' + t, { itemSeq: seq, numOfRows: 50, type: 'json' });
+      const list = d.items.filter(r => !r.ITEM_SEQ || r.ITEM_SEQ === seq);
+      if (list.length) rows[t] = list;
+    } catch (e) { /* 이 유형은 건너뜀 */ }
+  }));
+  return { types: DUR_TYPES.filter(t => rows[t]), rows };
+}
+// 병용금기 행들을 상대 성분별로 묶기
+export function groupTaboo(list) {
+  const m = new Map();
+  for (const r of list) {
+    const k = nz(r.MIXTURE_INGR_KOR_NAME) || nz(r.MIXTURE_INGR_ENG_NAME) || '알 수 없음';
+    const g = m.get(k) || { ingr: k, eng: nz(r.MIXTURE_INGR_ENG_NAME), why: nz(r.PROHBT_CONTENT), items: [] };
+    if (r.MIXTURE_ITEM_NAME && g.items.length < 3 && !g.items.some(x => x.seq === r.MIXTURE_ITEM_SEQ)) g.items.push({ seq: r.MIXTURE_ITEM_SEQ, name: shortName(r.MIXTURE_ITEM_NAME) });
+    m.set(k, g);
+  }
+  return [...m.values()];
+}
+export const durText = r => nz(r.PROHBT_CONTENT) || nz(r.REMARK);
+export { nz };
 
 // ---- 영업시간 ----
 export const DAYS = ['월', '화', '수', '목', '금', '토', '일', '공휴일'];
@@ -152,6 +214,7 @@ h1{font-size:clamp(26px,4vw,40px);font-weight:800}h2{font-size:21px;font-weight:
 .hrs div{background:var(--paper);border-radius:8px;padding:6px 2px}.hrs b{display:block;font-size:12px;color:var(--mute);font-weight:500}.hrs .off{opacity:.55}.hrs .today{outline:2px solid var(--red)}
 .acts{display:flex;gap:8px;flex-wrap:wrap}
 .note{font-size:14px;color:var(--mute)}
+li.dur{border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:12px;padding:10px 14px}li.dur b{display:block}li.dur small{color:var(--mute);font-size:14px}li.dur a{color:var(--ink)}
 footer{border-top:1px solid var(--line);color:var(--mute);font-size:14px;margin-top:40px}footer p{margin:4px 0;max-width:80ch}footer a{color:var(--mute)}
 @media(max-width:600px){.hrs{grid-template-columns:repeat(4,minmax(0,1fr))}form.s{max-width:none;flex-basis:100%}}`;
 
@@ -184,7 +247,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(
 <script>{const b=document.getElementById('shareBtn'),m=document.getElementById('shareMsg');b.addEventListener('click',async()=>{const d={title:document.title,url:location.href};try{if(navigator.share){await navigator.share(d);return}await navigator.clipboard.writeText(location.href);m.textContent='주소를 복사했어요. 카톡에 붙여넣어 보내세요.'}catch(e){if(e&&e.name==='AbortError')return;m.textContent=location.href}})}</script>
 </div></main>
 <footer class="band"><div class="wrap">
-  <p><a href="/">약 검색</a> · <a href="/pharmacy">지역별 약국 영업시간</a></p>
+  <p><a href="/">약 검색</a> · <a href="/check">같이 먹어도 되나요?</a> · <a href="/pill">모양으로 약 찾기</a> · <a href="/pharmacy">지역별 약국 영업시간</a> · <a href="/convenience">편의점 상비약</a></p>
   <p>약 정보: 식품의약품안전처 의약품 제품 허가정보·의약품개요정보(e약은요). 약국 정보: 국립중앙의료원 전국 약국 정보. 공공데이터포털(data.go.kr) 제공.</p>
   <p>영업시간은 약국이 신고한 정보라 실제와 다를 수 있어요. 방문 전에 꼭 전화로 확인하세요. 이 사이트는 정보 안내만 하며 약을 팔지 않습니다. 복용은 약사나 의사와 상담하세요.</p>
 </div></footer>
