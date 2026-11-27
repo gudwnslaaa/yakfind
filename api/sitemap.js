@@ -1,5 +1,5 @@
 // /sitemaps/drugs.xml, /sitemaps/pharmacy.xml → 검색엔진용 주소 목록
-import { callAll, SIDO, regionOf, getQuery, SITE } from './_lib.js';
+import { callAll, SIDO, regionOf, getQuery, SITE, INGR_LIST, SYMPTOMS } from './_lib.js';
 
 const xml = urls => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u => `  <url><loc>${u.replace(/&/g, '&amp;')}</loc></url>`).join('\n')}\n</urlset>\n`;
 
@@ -8,7 +8,8 @@ export default async function handler(req, res) {
   try {
     let urls = [];
     if (type === 'home') {
-      urls = [`${SITE}/`, `${SITE}/pharmacy`, `${SITE}/convenience`, `${SITE}/check`, `${SITE}/pill`];
+      urls = [`${SITE}/`, `${SITE}/pharmacy`, `${SITE}/convenience`, `${SITE}/check`, `${SITE}/pill`, `${SITE}/disposal`, `${SITE}/ingredient`, `${SITE}/symptom`,
+        ...INGR_LIST.map(x => `${SITE}/ingredient/${encodeURIComponent(x.ko)}`), ...SYMPTOMS.map(x => `${SITE}/symptom/${encodeURIComponent(x[0])}`)];
     } else if (type === 'drugs') {
       // e약은요에 실린 일반의약품 (효능·사용법 정보가 있는 약)
       const d = await callAll('easy', { type: 'json' }, 100, 80, 8);

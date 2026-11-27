@@ -70,7 +70,7 @@ export default async function handler(req, res) {
 ${img ? `<a class="photo" href="${esc(img)}" target="_blank" rel="noopener"><img src="${esc(img)}" alt="${esc(sname)} 낱알 사진"></a><p class="cap">식약처 제공 낱알 사진 · 포장이나 색은 실제와 다를 수 있어요</p>` : ''}
 
 <h2>성분</h2>
-${ing.length ? `<div class="chips">${ing.map(x => `<span>${esc(showIngr(x))}</span>`).join('')}</div>` : '<p class="note">성분 정보가 없어요.</p>'}
+${ing.length ? `<div class="chips">${ing.map(x => koName(x) ? `<a href="/ingredient/${encodeURIComponent(koName(x))}" style="background:var(--paper);border-radius:8px;padding:4px 10px;font-weight:500">${esc(showIngr(x))} →</a>` : `<span>${esc(showIngr(x))}</span>`).join('')}</div>` : '<p class="note">성분 정보가 없어요.</p>'}
 ${rx ? '<p class="box">전문의약품이라 처방전이 있어야 살 수 있어요. 처방전을 받았다면 약국에 이 약이 있는지 전화로 먼저 물어보세요.</p>' : ''}
 
 <div class="box cta">

@@ -91,6 +91,9 @@ export function ingredients(d) {
 export const ingrSet = d => [...new Set(ingredients(d).map(ingrKey))].sort().join('|');
 const KO = {'acetaminophen':'아세트아미노펜','ibuprofen':'이부프로펜','dexibuprofen':'덱시부프로펜','naproxen':'나프록센','naproxen sodium':'나프록센나트륨','aspirin':'아스피린','caffeine':'카페인','isopropylantipyrine':'이소프로필안티피린','chlorpheniramine maleate':'클로르페니라민말레산염','pseudoephedrine hydrochloride':'슈도에페드린염산염','phenylephrine hydrochloride':'페닐레프린염산염','dextromethorphan hydrobromide':'덱스트로메토르판브롬화수소산염','guaifenesin':'구아이페네신','dl methylephedrine hydrochloride':'dl-메틸에페드린염산염','loratadine':'로라타딘','cetirizine hydrochloride':'세티리진염산염','fexofenadine hydrochloride':'펙소페나딘염산염','famotidine':'파모티딘','pamabrom':'파마브롬','magnesium oxide':'산화마그네슘','ascorbic acid':'아스코르브산','thiamine nitrate':'질산티아민','riboflavin':'리보플라빈','loperamide hydrochloride':'로페라미드염산염','simethicone':'시메티콘','bisacodyl':'비사코딜','ketoprofen':'케토프로펜','diclofenac sodium':'디클로페낙나트륨','noscapine':'노스카핀'};
 export const koName = n => KO[ingrKey(n)] || '';
+// 한글 성분명 → 검색용 영문 (예: 아세트아미노펜 → Acetaminophen)
+export const INGR_LIST = Object.entries(KO).map(([en, ko]) => ({ ko, key: en, q: en.replace(/^dl /, '').replace(/\b\w/g, c => c.toUpperCase()) }));
+export const findIngr = name => { const n = String(name || '').trim(); const k = ingrKey(n); return INGR_LIST.find(x => x.ko === n || x.key === k) || null; };
 export const showIngr = n => koName(n) ? `${koName(n)} (${n})` : n;
 const COMMON = new Set(['acetaminophen','caffeine','ibuprofen','chlorpheniramine maleate','ascorbic acid','thiamine nitrate','riboflavin','magnesium oxide','pyridoxine hydrochloride']);
 export const queryIngr = ing => ing.find(x => !COMMON.has(ingrKey(x))) || ing[0];
@@ -98,6 +101,8 @@ export const isRx = d => /전문/.test(d.SPCLTY_PBLC || '');
 export const alive = d => !/취소|취하|폐지/.test(d.CANCEL_NAME || '') && !/수출용/.test(d.ITEM_NAME || '');
 export const imgOf = d => { const u = String(d.BIG_PRDT_IMG_URL || d.ITEMIMAGE || '').trim(); return /^https?:\/\//.test(u) ? u.replace(/^http:/, 'https:') : ''; };
 export const shortName = n => clean(n).replace(/\(.*?\)/g, '').trim();
+
+export const SYMPTOMS = [['두통', '두통'], ['발열', '열'], ['감기', '감기'], ['기침', '기침'], ['콧물', '콧물'], ['코막힘', '코막힘'], ['인후통', '목 아플 때'], ['소화불량', '소화불량'], ['속쓰림', '속쓰림'], ['설사', '설사'], ['변비', '변비'], ['멀미', '멀미'], ['알레르기', '알레르기'], ['근육통', '근육통'], ['관절통', '관절통'], ['생리통', '생리통'], ['치통', '치통'], ['구내염', '입병(구내염)'], ['무좀', '무좀'], ['습진', '습진'], ['여드름', '여드름'], ['불면', '잠 못 잘 때'], ['숙취', '숙취'], ['피로', '피로']];
 
 // ---- 품목 찾기 (품목코드 → 허가정보) ----
 export async function findPermit(seq) {
@@ -259,7 +264,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(
 <script>{const b=document.getElementById('shareBtn'),m=document.getElementById('shareMsg');b.addEventListener('click',async()=>{const d={title:document.title,url:location.href};try{if(navigator.share){await navigator.share(d);return}await navigator.clipboard.writeText(location.href);m.textContent='주소를 복사했어요. 카톡에 붙여넣어 보내세요.'}catch(e){if(e&&e.name==='AbortError')return;m.textContent=location.href}})}</script>
 </div></main>
 <footer class="band"><div class="wrap">
-  <p><a href="/">약 검색</a> · <a href="/check">같이 먹어도 되나요?</a> · <a href="/pill">모양으로 약 찾기</a> · <a href="/pharmacy">지역별 약국 영업시간</a> · <a href="/convenience">편의점 상비약</a></p>
+  <p><a href="/">약 검색</a> · <a href="/check">같이 먹어도 되나요?</a> · <a href="/pill">모양으로 약 찾기</a> · <a href="/pharmacy">지역별 약국 영업시간</a> · <a href="/convenience">편의점 상비약</a> · <a href="/symptom">증상별 약</a> · <a href="/ingredient">성분별 약</a> · <a href="/disposal">남은 약 버리는 법</a></p>
   <p>약 정보: 식품의약품안전처 의약품 제품 허가정보·의약품개요정보(e약은요). 약국 정보: 국립중앙의료원 전국 약국 정보. 공공데이터포털(data.go.kr) 제공.</p>
   <p>영업시간은 약국이 신고한 정보라 실제와 다를 수 있어요. 방문 전에 꼭 전화로 확인하세요. 이 사이트는 정보 안내만 하며 약을 팔지 않습니다. 복용은 약사나 의사와 상담하세요.</p>
 </div></footer>
