@@ -136,7 +136,8 @@ export async function durFor(seq) {
       for (const r of d.items) if (r.ITEM_SEQ === seq) for (const t of String(r.TYPE_NAME || '').split(/[,/]/)) { const k = t.trim().replace(/\s/g, ''); if (k) types.add(k); }
     }
   } catch (e) { /* 아래에서 전부 조회 */ }
-  const want = types ? DUR_TYPES.filter(t => types.has(t)) : DUR_TYPES;
+  // 요약 목록에 빠지는 경우가 있어 병용금기·효능군중복은 항상 직접 조회
+  const want = types ? DUR_TYPES.filter(t => types.has(t) || t === '병용금기' || t === '효능군중복') : DUR_TYPES;
   const rows = {};
   await Promise.all(want.map(async t => {
     try {
