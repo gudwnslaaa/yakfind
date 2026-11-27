@@ -384,7 +384,7 @@ function drawPh() {
   if (!pharmacies.length) { $('#phs').innerHTML = '<div class="empty">근처에서 약국을 찾지 못했어요.</div>'; return; }
   if (!list.length) { $('#phs').innerHTML = `<div class="empty">${FILTER_EMPTY[filter]} '전체'를 누르면 ${pharmacies.length}곳을 모두 볼 수 있어요.</div>`; return; }
   $('#phs').innerHTML = list.map(p => {
-    const tel = clean(p.DUTYTEL1); const telHref = tel.replace(/[^\d]/g, '');
+    const telRaw = clean(p.DUTYTEL1).replace(/\D/g, ''); const tel = telRaw.length >= 8 && !/0000000/.test(telRaw) ? clean(p.DUTYTEL1) : ''; const telHref = tel.replace(/[^\d]/g, '');
     const lat = parseFloat(p.LATITUDE || p.WGS84LAT), lon = parseFloat(p.LONGITUDE || p.WGS84LON);
     const nm = clean(p.DUTYNAME);
     // 좌표가 있으면 카카오맵에 그 자리로 핀을 꽂아 열고, 없으면 이름+시·구로 네이버 검색
