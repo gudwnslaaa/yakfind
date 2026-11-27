@@ -105,6 +105,12 @@ dialog.lb p{color:#fff;text-align:center;margin:10px 0 0;font-size:15px}
 .popular{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:14px;font-size:14px}
 .popular span{color:var(--mute)}
 .popular a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px;padding:6px 0}
+.popular .sym{border:0;background:none;color:var(--ink);font:inherit;font-size:14px;padding:6px 0;cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px;min-height:32px}
+.popular .sym:hover,.popular .sym.on{text-decoration-color:var(--red);color:var(--red)}
+.mine{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;font-size:14px}
+.mine span{color:var(--mute)}.mine a{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:4px 12px;text-decoration:none;color:var(--ink);min-height:34px}
+.star.on{background:var(--warnbg,#fff1d6);border-color:#e0b04a}
+.symnote{font-size:14px;color:var(--mute);margin:0 0 10px}
 .popular a:hover{text-decoration-color:var(--red)}
 .filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
 .fchip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;font-weight:500}
@@ -148,6 +154,11 @@ footer p{margin:4px 0;max-width:80ch}
       <a href="/?q=%EB%B6%80%EB%A3%A8%ED%8E%9C" data-q="부루펜">부루펜</a>
       <a href="/?q=%EC%BD%94%EB%A6%AC%EA%B8%B0%EB%8B%A4" data-q="코리기다">코리기다</a>
     </nav>
+    <nav class="popular" aria-label="증상으로 찾기"><span>증상으로 찾기</span>
+      <button type="button" class="sym" data-s="두통">두통</button><button type="button" class="sym" data-s="발열">열</button><button type="button" class="sym" data-s="감기">감기</button><button type="button" class="sym" data-s="기침">기침</button><button type="button" class="sym" data-s="콧물">콧물</button><button type="button" class="sym" data-s="소화불량">소화불량</button><button type="button" class="sym" data-s="속쓰림">속쓰림</button><button type="button" class="sym" data-s="설사">설사</button><button type="button" class="sym" data-s="변비">변비</button><button type="button" class="sym" data-s="멀미">멀미</button><button type="button" class="sym" data-s="알레르기">알레르기</button><button type="button" class="sym" data-s="근육통">근육통</button><button type="button" class="sym" data-s="생리통">생리통</button><button type="button" class="sym" data-s="치통">치통</button><button type="button" class="sym" data-s="구내염">입병</button>
+    </nav>
+    <div id="mine"></div>
+    <p class="popular" style="margin-top:10px"><a href="/convenience">밤·휴일에 약국이 다 닫았다면? 편의점 상비약 11가지 보기</a></p>
   </div>
 </header>
 
@@ -241,6 +252,38 @@ const nameOf = d => clean(pick(d, 'ITEM_NAME', 'ITEMNAME'));
 const shortName = n => n.replace(/\(.*?\)/g, '').trim();
 
 /* ---------- 최근 검색 ---------- */
+/* ---------- 내 약 (이 기기에만 저장) ---------- */
+const mine = () => store.get('yak_mine', []);
+const isMine = seq => mine().some(x => x.seq === seq);
+function toggleMine(d) {
+  let m = mine();
+  if (m.some(x => x.seq === d.ITEM_SEQ)) m = m.filter(x => x.seq !== d.ITEM_SEQ);
+  else m.unshift({seq: d.ITEM_SEQ, name: shortName(nameOf(d))});
+  store.set('yak_mine', m.slice(0, 20)); drawMine();
+}
+function drawMine() {
+  const m = mine();
+  $('#mine').innerHTML = m.length ? `<div class="mine"><span>★ 내 약</span>${m.map(x => `<a href="/drug/${esc(x.seq)}">${esc(x.name)}</a>`).join('')}</div>` : '';
+}
+
+/* ---------- 증상으로 찾기 ---------- */
+document.querySelectorAll('.sym').forEach(b => b.addEventListener('click', () => symptom(b.dataset.s, b.textContent)));
+async function symptom(key, label) {
+  document.querySelectorAll('.sym').forEach(b => b.classList.toggle('on', b.dataset.s === key));
+  $('#detail').innerHTML = ''; current = null; drawScript();
+  $('#h-drug').firstChild.textContent = `'${label}'에 쓰는 일반의약품 `;
+  $('#drugs').innerHTML = '<div class="load">찾는 중</div>'; $('#cnt').textContent = '';
+  try { history.replaceState(null, '', '/?s=' + encodeURIComponent(key)); } catch (e) {}
+  try {
+    const j = await api({action: 'symptom', q: key});
+    const list = j.items.filter(x => !/수출용/.test(x.ITEMNAME || ''));
+    $('#cnt').textContent = j.total > list.length ? `${j.total}개 중 ${list.length}개` : `${list.length}개`;
+    if (!list.length) { $('#drugs').innerHTML = '<div class="empty">해당하는 약을 찾지 못했어요.</div>'; return; }
+    $('#drugs').innerHTML = `<p class="symnote">효능에 '${esc(key)}'이(가) 적힌 일반의약품이에요. 증상이 심하거나 오래가면 약사·의사와 상담하세요.</p>` + list.map(x => `
+      <a class="item" style="text-decoration:none" href="/drug/${esc(x.ITEMSEQ)}">${thumb({ITEMIMAGE: x.ITEMIMAGE})}<div style="flex:1"><b>${esc(clean(x.ITEMNAME))}</b><span>${esc(clean(x.ENTPNAME))} · ${esc(clean(x.EFCYQESITM).slice(0, 60))}…</span></div><span class="tag otc">일반</span></a>`).join('');
+  } catch (e) { $('#drugs').innerHTML = `<div class="empty err">${esc(e.message)}</div>`; }
+}
+
 function drawRecent() {
   const r = store.get('yak_recent', []);
   $('#recent').innerHTML = r.map(t => `<button type="button" class="chip" data-q="${esc(t)}">${esc(t)}</button>`).join('');
@@ -251,6 +294,7 @@ $('#recent').addEventListener('click', e => { const b = e.target.closest('[data-
 let drugResults = [];
 async function search(q) {
   q = q.trim(); if (q.length < 2) return;
+  $('#h-drug').firstChild.textContent = '약 검색 결과 '; document.querySelectorAll('.sym').forEach(b => b.classList.remove('on'));
   try { history.replaceState(null, '', '/?q=' + encodeURIComponent(q)); } catch (e) {}
   document.title = `${q} 같은 성분 약·파는 약국 찾기 — 이 약 어디 있지?`;
   const r = store.get('yak_recent', []).filter(t => t !== q); r.unshift(q); store.set('yak_recent', r.slice(0, 6)); drawRecent();
@@ -291,11 +335,12 @@ async function select(i) {
       <div><b>성분</b>${ing.length ? `<div class="ingr">${ing.map(x => `<span>${esc(showIngr(x))}</span>`).join('')}</div>` : '<p class="note">성분 정보가 없어요.</p>'}</div>
       ${isRx(d) ? '<p class="warn">전문의약품이라 처방전이 있어야 살 수 있어요. 처방전을 받았다면 약국에 이 약이 있는지 전화로 먼저 물어보세요.</p>' : ''}
       <div id="easy"></div>
-      <div class="row">${ing.length ? '<button class="btn" id="sameBtn" type="button">같은 성분 제품 보기</button>' : ''}${d.ITEM_SEQ ? `<a class="btn" href="/drug/${esc(d.ITEM_SEQ)}">약 정보 페이지 (공유용)</a>` : ''}</div>
+      <div class="row">${ing.length ? '<button class="btn" id="sameBtn" type="button">같은 성분 제품 보기</button>' : ''}${d.ITEM_SEQ ? `<a class="btn" href="/drug/${esc(d.ITEM_SEQ)}">약 정보 페이지 (공유용)</a><button class="btn star${isMine(d.ITEM_SEQ) ? ' on' : ''}" id="starBtn" type="button" aria-pressed="${isMine(d.ITEM_SEQ)}">${isMine(d.ITEM_SEQ) ? '★ 내 약에 저장됨' : '☆ 내 약에 저장'}</button>` : ''}</div>
       ${ing.length ? '<div id="same" class="same"></div>' : ''}
     </article>`;
   drawScript();
   if ($('#sameBtn')) $('#sameBtn').addEventListener('click', () => same(d));
+  if ($('#starBtn')) $('#starBtn').addEventListener('click', e => { toggleMine(d); const on = isMine(d.ITEM_SEQ); e.currentTarget.classList.toggle('on', on); e.currentTarget.setAttribute('aria-pressed', on); e.currentTarget.textContent = on ? '★ 내 약에 저장됨' : '☆ 내 약에 저장'; });
   if (window.innerWidth < 900) $('#env').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'});
   if (!isRx(d) && d.ITEM_SEQ) {
     $('#easy').innerHTML = '<p class="load note">효능·사용법 불러오는 중</p>';
@@ -382,7 +427,7 @@ const FILTER_EMPTY = {open: '지금 영업 중으로 등록된 약국이 없어�
 function drawPh() {
   const list = pharmacies.filter(FILTERS[filter]);
   if (!pharmacies.length) { $('#phs').innerHTML = '<div class="empty">근처에서 약국을 찾지 못했어요.</div>'; return; }
-  if (!list.length) { $('#phs').innerHTML = `<div class="empty">${FILTER_EMPTY[filter]} '전체'를 누르면 ${pharmacies.length}곳을 모두 볼 수 있어요.</div>`; return; }
+  if (!list.length) { $('#phs').innerHTML = `<div class="empty">${FILTER_EMPTY[filter]} '전체'를 누르면 ${pharmacies.length}곳을 모두 볼 수 있어요.${filter === 'open' ? '<br><a href="/convenience">급하면 편의점 상비약을 확인해 보세요 →</a>' : ''}</div>`; return; }
   $('#phs').innerHTML = list.map(p => {
     const telRaw = clean(p.DUTYTEL1).replace(/\D/g, ''); const tel = telRaw.length >= 8 && !/0000000/.test(telRaw) ? clean(p.DUTYTEL1) : ''; const telHref = tel.replace(/[^\d]/g, '');
     const lat = parseFloat(p.LATITUDE || p.WGS84LAT), lon = parseFloat(p.LONGITUDE || p.WGS84LON);
@@ -406,6 +451,17 @@ document.querySelector('.filters').addEventListener('click', e => {
 });
 if (isHoliday()) $('#holiday').innerHTML = '<p class="hol">오늘은 공휴일이에요. <b>지역으로 찾기</b>를 쓰면 약국이 신고한 공휴일 영업시간으로 보여드려요. 내 위치 검색은 평소 시간이 나올 수 있으니 꼭 전화로 확인하세요.</p>';
 
+// 가장 가까운 약국 주소로 우리 동네 요일별 영업시간 페이지 연결
+function areaLink(p) {
+  const old = $('#arealink'); if (old) old.remove();
+  if (!p) return;
+  const t = clean(p.DUTYADDR).split(' ');
+  if (!t[1] || !/(시|군|구)$/.test(t[1])) return;
+  const slug = /시$/.test(t[1]) && t[2] && /구$/.test(t[2]) ? `${t[1]}-${t[2]}` : t[1];
+  const el = document.createElement('p'); el.id = 'arealink'; el.className = 'note';
+  el.innerHTML = `<a href="/pharmacy/${encodeURIComponent(t[0])}/${encodeURIComponent(slug)}">${esc(slug.replace('-', ' '))} 약국 전체의 요일별 영업시간 보기 (일요일·공휴일 포함) →</a>`;
+  $('#phs').before(el);
+}
 function prepNear(items) {
   return items.map(p => {
     const km = parseFloat(p.DISTANCE);
@@ -434,7 +490,7 @@ $('#geo').addEventListener('click', () => {
     $('#phs').innerHTML = '<div class="load">주변 약국 찾는 중</div>';
     try {
       const j = await api({action: 'near', lat: pos.coords.latitude, lon: pos.coords.longitude});
-      pharmacies = prepNear(j.items); lastPhMode = 'near'; drawPh();
+      pharmacies = prepNear(j.items); lastPhMode = 'near'; drawPh(); areaLink(pharmacies[0]);
     } catch (e) { $('#phs').innerHTML = `<div class="empty err">${esc(e.message)}</div>`; }
   }, err => {
     $('#phs').innerHTML = `<div class="empty err">${err.code === 1 ? '위치 권한이 꺼져 있어요. 브라우저 설정에서 허용하거나 아래에 지역을 입력해 주세요.' : '위치를 확인하지 못했어요. 지역으로 찾아 주세요.'}</div>`;
@@ -455,6 +511,8 @@ $('#af').addEventListener('submit', async e => {
 });
 
 document.querySelector('.popular').addEventListener('click', e => { const l = e.target.closest('[data-q]'); if (!l) return; e.preventDefault(); $('#q').value = l.dataset.q; search(l.dataset.q); });
+drawMine();
+{ const s0 = new URLSearchParams(location.search).get('s'); const b0 = s0 && [...document.querySelectorAll('.sym')].find(b => b.dataset.s === s0); if (b0) symptom(s0, b0.textContent); }
 { const q0 = new URLSearchParams(location.search).get('q') || decodeURIComponent((location.hash || '').slice(1)); if (q0 && q0.trim().length >= 2) { $('#q').value = q0.trim(); search(q0.trim()); } }
 const a = store.get('yak_area', null); if (a) { $('#sido').value = a.sido || ''; $('#gu').value = a.gu || ''; }
 drawRecent();
