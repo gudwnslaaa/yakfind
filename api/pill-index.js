@@ -11,13 +11,13 @@ export default async function handler(req, res) {
     const pages = Math.ceil(first.total / ROWS);
     const per = Math.ceil(pages / PARTS);
     const nums = []; for (let p = part * per + 1; p <= Math.min(pages, (part + 1) * per); p++) nums.push(p);
-    const rows = []; let missing = 0;
+    const rows = []; let missing = 0, lastErr = '';
     const sleep = ms => new Promise(r => setTimeout(r, ms));
     // 서버가 한꺼번에 많은 요청을 거절하므로 3개씩, 실패하면 최대 3번 다시 시도
     const getPage = async n => {
       if (n === 1) return first;
       for (let t = 0; t < 4; t++) {
-        try { const g = await call('pill', { numOfRows: ROWS, pageNo: n, type: 'json' }); if (g.items.length) return g; } catch (e) { /* 다시 */ }
+        try { const g = await call('pill', { numOfRows: ROWS, pageNo: n, type: 'json' }); if (g.items.length) return g; lastErr = 'empty page ' + n + ' total ' + g.total; } catch (e) { lastErr = String(e.message || e).slice(0, 200); }
         await sleep(600 * (t + 1));
       }
       return null;
@@ -37,7 +37,7 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     // 다 받았을 때만 오래 저장, 빠진 쪽이 있으면 5분 뒤 다시 받기
     res.setHeader('Cache-Control', missing ? 'public, s-maxage=300' : 'public, s-maxage=604800, stale-while-revalidate=2592000');
-    res.end(JSON.stringify({ ok: true, part, total: first.total, pages: nums.length, missing, rows }));
+    res.end(JSON.stringify({ ok: true, part, total: first.total, pages: nums.length, missing, lastErr, rows }));
   } catch (e) {
     res.statusCode = 502; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'no-store');
     res.end(JSON.stringify({ ok: false, error: e.message }));
