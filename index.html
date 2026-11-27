@@ -112,6 +112,10 @@ dialog.lb p{color:#fff;text-align:center;margin:10px 0 0;font-size:15px}
 .mine span{color:var(--mute)}.mine a{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:4px 12px;text-decoration:none;color:var(--ink);min-height:34px}
 .star.on{background:var(--warnbg,#fff1d6);border-color:#e0b04a}
 .symnote{font-size:14px;color:var(--mute);margin:0 0 10px}
+.tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}
+.tools a{display:block;border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-decoration:none;color:var(--ink);background:var(--bg)}
+.tools a:hover{border-color:var(--red)}.tools b{display:block;font-size:15px}.tools span{font-size:13px;color:var(--mute)}
+@media(max-width:760px){.tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .popular a:hover{text-decoration-color:var(--red)}
 .filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
 .fchip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;font-weight:500}
@@ -159,7 +163,12 @@ footer p{margin:4px 0;max-width:80ch}
       <button type="button" class="sym" data-s="두통">두통</button><button type="button" class="sym" data-s="발열">열</button><button type="button" class="sym" data-s="감기">감기</button><button type="button" class="sym" data-s="기침">기침</button><button type="button" class="sym" data-s="콧물">콧물</button><button type="button" class="sym" data-s="소화불량">소화불량</button><button type="button" class="sym" data-s="속쓰림">속쓰림</button><button type="button" class="sym" data-s="설사">설사</button><button type="button" class="sym" data-s="변비">변비</button><button type="button" class="sym" data-s="멀미">멀미</button><button type="button" class="sym" data-s="알레르기">알레르기</button><button type="button" class="sym" data-s="근육통">근육통</button><button type="button" class="sym" data-s="생리통">생리통</button><button type="button" class="sym" data-s="치통">치통</button><button type="button" class="sym" data-s="구내염">입병</button>
     </nav>
     <div id="mine"></div>
-    <p class="popular" style="margin-top:10px"><a href="/convenience">밤·휴일에 약국이 다 닫았다면? 편의점 상비약 11가지 보기</a></p>
+    <nav class="tools" aria-label="도구">
+      <a href="/check"><b>같이 먹어도 되나요?</b><span>약 2~5개 병용금기·중복 확인</span></a>
+      <a href="/pill"><b>이 알약 무슨 약?</b><span>글자·모양·색으로 찾기</span></a>
+      <a href="/pharmacy"><b>일요일·공휴일 약국</b><span>우리 동네 요일별 영업시간</span></a>
+      <a href="/convenience"><b>편의점 상비약</b><span>약국이 다 닫았을 때</span></a>
+    </nav>
   </div>
 </header>
 

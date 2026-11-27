@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>같이 먹어도 되나요? 약 병용금기·성분 중복 확인 | 이 약, 어디 있지?</title>
+<meta name="description" content="먹는 약 2~5개를 고르면 식약처 DUR 정보로 함께 먹으면 안 되는 조합, 같은 성분 중복, 같은 종류 약 중복을 무료로 확인해 드려요.">
+<link rel="canonical" href="https://yakfind.vercel.app/check">
+
+<meta property="og:type" content="website"><meta property="og:site_name" content="이 약, 어디 있지?">
+<meta property="og:title" content="같이 먹어도 되나요? 약 병용금기·성분 중복 확인 | 이 약, 어디 있지?"><meta property="og:description" content="먹는 약 2~5개를 고르면 식약처 DUR 정보로 함께 먹으면 안 되는 조합, 같은 성분 중복, 같은 종류 약 중복을 무료로 확인해 드려요.">
+<meta property="og:url" content="https://yakfind.vercel.app/check"><meta property="og:image" content="https://yakfind.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#d1291f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23d1291f'/%3E%3Ctext x='32' y='45' font-size='38' font-weight='800' text-anchor='middle' fill='white' font-family='sans-serif'%3E%EC%95%BD%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@600;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>:root{color-scheme:light dark;--bg:light-dark(#ffffff,#15171a);--paper:light-dark(#f6f3ee,#1f2226);--ink:light-dark(#1b1d20,#eceae6);--mute:light-dark(#5f646b,#a3a7ad);--line:light-dark(#e3ded6,#33373c);--red:light-dark(#d1291f,#ff6a5e);--redbg:light-dark(#fdecea,#3a1f1d);--ok:light-dark(#1f6f45,#7fd3a3);--okbg:light-dark(#e6f4ec,#1d3327);--warnbg:light-dark(#fff1d6,#3a2e14);--warn:light-dark(#8a5a00,#f3c96b)}
+*{box-sizing:border-box;min-width:0}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Gothic A1","Noto Sans KR",sans-serif;line-height:1.2;text-wrap:balance;margin:0}a{color:inherit}
+.band{padding:clamp(18px,3vw,40px) max(5vw,16px)}.wrap{max-width:980px;margin:0 auto}
+header.band{border-bottom:1px solid var(--line);padding-top:16px;padding-bottom:16px}
+.top{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.brand{display:flex;gap:10px;align-items:center;text-decoration:none;font:800 20px "Gothic A1",sans-serif}
+.sign{width:38px;height:38px;border-radius:10px;background:var(--red);color:#fff;display:grid;place-items:center;font:800 22px/1 "Gothic A1",sans-serif}
+form.s{display:flex;gap:8px;flex:1;max-width:420px}form.s input{flex:1;height:44px;border:1px solid var(--line);border-radius:12px;padding:0 14px;font:inherit;font-size:16px;background:var(--bg);color:var(--ink)}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;font-weight:600;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn.red{background:var(--red);border-color:var(--red);color:#fff}.btn.ink{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.crumb{font-size:14px;color:var(--mute);margin-bottom:10px}.crumb a{color:var(--mute)}
+h1{font-size:clamp(26px,4vw,40px);font-weight:800}h2{font-size:21px;font-weight:800;margin:32px 0 12px}
+.sub{color:var(--mute);margin:6px 0 0}
+.tag{display:inline-block;font-size:13px;font-weight:600;border-radius:6px;padding:1px 8px;white-space:nowrap}
+.rx{background:var(--redbg);color:var(--red)}.otc,.open{background:var(--okbg);color:var(--ok)}.soon,.late{background:var(--warnbg);color:var(--warn)}.closed{background:var(--paper);color:var(--mute)}
+.photo{display:block;width:100%;max-width:560px;border-radius:14px;overflow:hidden;border:1px solid var(--line);margin:18px 0 6px;background:#fff}.photo img{display:block;width:100%;aspect-ratio:780/426;object-fit:cover}
+.cap{font-size:13px;color:var(--mute);margin:0 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chips span{background:var(--paper);border-radius:8px;padding:4px 10px;font-weight:500}
+.box{background:var(--paper);border-radius:16px;padding:18px 20px;margin:20px 0}.box.cta{border-top:5px solid var(--red)}
+.sec p{margin:6px 0 0;white-space:pre-line;max-width:72ch}
+.list{display:flex;flex-direction:column;gap:8px;list-style:none;padding:0;margin:0}
+.it{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-decoration:none;color:var(--ink)}a.it:hover{border-color:var(--ink)}
+.it b{display:block}.it small{color:var(--mute);font-size:14px}
+.thumb{flex:none;width:64px;height:44px;border-radius:8px;background:var(--paper);overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;list-style:none;padding:0;margin:0}
+.grid a{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-decoration:none}.grid a:hover{border-color:var(--ink)}.grid small{color:var(--mute)}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}.stats div{background:var(--paper);border-radius:12px;padding:10px 16px}.stats b{font-size:22px;display:block}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.fchip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;font:inherit;font-weight:500}.fchip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ph{border:1px solid var(--line);border-radius:14px;padding:14px 16px}.ph .hd{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.ph h3{font-size:18px}
+.ph .addr{color:var(--mute);font-size:14px;margin:2px 0 8px}.ph .badges{display:flex;gap:6px;flex-wrap:wrap}
+.hrs{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin:10px 0;font-size:13px;text-align:center}
+.hrs div{background:var(--paper);border-radius:8px;padding:6px 2px}.hrs b{display:block;font-size:12px;color:var(--mute);font-weight:500}.hrs .off{opacity:.55}.hrs .today{outline:2px solid var(--red)}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.note{font-size:14px;color:var(--mute)}
+li.dur{border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:12px;padding:10px 14px}li.dur b{display:block}li.dur small{color:var(--mute);font-size:14px}li.dur a{color:var(--ink)}
+footer{border-top:1px solid var(--line);color:var(--mute);font-size:14px;margin-top:40px}footer p{margin:4px 0;max-width:80ch}footer a{color:var(--mute)}
+@media(max-width:600px){.hrs{grid-template-columns:repeat(4,minmax(0,1fr))}form.s{max-width:none;flex-basis:100%}}</style>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</head><body>
+<header class="band"><div class="wrap top">
+  <a class="brand" href="/"><span class="sign" aria-hidden="true">약</span>이 약, 어디 있지?</a>
+  <form class="s" action="/" method="get" role="search"><input name="q" type="search" placeholder="약 이름 검색" aria-label="약 이름" required minlength="2"><button class="btn ink" type="submit">찾기</button></form>
+</div></header>
+<main class="band"><div class="wrap">
+<nav class="crumb"><a href="/">약 검색</a> › 같이 먹어도 되나요?</nav>
+<h1>이 약들, 같이 먹어도 되나요?</h1>
+<p class="sub">먹고 있는 약이나 먹으려는 약을 2~5개 고르면, 식약처 DUR 정보로 <b>함께 먹으면 안 되는 조합</b>, <b>같은 성분 중복</b>, <b>같은 종류 약 중복</b>을 확인해 드려요.</p>
+<div class="box">
+  <form id="cf" class="s" style="max-width:none" role="search"><input id="cq" type="search" placeholder="약 이름 (예: 타이레놀, 판콜)" aria-label="약 이름" minlength="2" required><button class="btn ink" type="submit">찾기</button></form>
+  <div id="cres" class="list" style="margin-top:10px"></div>
+  <p id="mineRow" class="note" style="margin:10px 0 0"></p>
+</div>
+<h2>고른 약 <small class="note" id="ccount">0개</small></h2>
+<ul id="picked" class="list"><li class="note">아직 고른 약이 없어요. 위에서 검색해서 추가하세요.</li></ul>
+<p style="margin-top:14px"><button class="btn red" id="go" type="button" disabled>같이 먹어도 되는지 확인</button></p>
+<div id="out"></div>
+<p class="note" style="margin-top:24px">DUR은 식약처가 고시한 금기·주의 정보예요. 여기 나오지 않아도 체질이나 질환에 따라 문제가 될 수 있으니, 여러 약을 함께 먹을 땐 꼭 약사에게 확인하세요. 처방약은 처방한 의사·약사의 안내를 따르세요.</p>
+<style>.pick{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px 14px}.pick button{border:0;background:none;color:var(--mute);font-size:20px;cursor:pointer;min-width:44px;min-height:44px}
+.res{border-radius:14px;padding:14px 16px;margin-top:10px}.res b{display:block;font-size:17px}.res.stop{background:var(--redbg);border-left:5px solid var(--red)}.res.warn{background:var(--warnbg);border-left:5px solid var(--warn)}.res.ok{background:var(--okbg);border-left:5px solid var(--ok)}
+.addbtn{display:flex;justify-content:space-between;width:100%;text-align:left;border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--bg);color:var(--ink);font:inherit;cursor:pointer}.addbtn:hover{border-color:var(--ink)}.addbtn small{color:var(--mute)}</style>
+<script>{
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const short=n=>String(n||'').replace(/<[^>]*>/g,'').replace(/\(.*?\)/g,'').trim();
+let picked=[];
+const draw=()=>{ $('#ccount').textContent=picked.length+'개'; $('#go').disabled=picked.length<2;
+  $('#picked').innerHTML=picked.length?picked.map((p,i)=>'<li class="pick"><span><b>'+esc(p.name)+'</b></span><button type="button" data-rm="'+i+'" aria-label="'+esc(p.name)+' 빼기">×</button></li>').join(''):'<li class="note">아직 고른 약이 없어요. 위에서 검색해서 추가하세요.</li>';
+  try{history.replaceState(null,'',picked.length?'/check?seqs='+picked.map(p=>p.seq).join(','):'/check')}catch(e){} };
+const add=(seq,name)=>{ if(!seq||picked.some(p=>p.seq===seq))return; if(picked.length>=5){alertBox('최대 5개까지 고를 수 있어요.');return} picked.push({seq,name}); draw(); $('#out').innerHTML=''; };
+const alertBox=t=>{$('#out').innerHTML='<p class="note">'+esc(t)+'</p>'};
+$('#picked').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(b){picked.splice(+b.dataset.rm,1);draw();$('#out').innerHTML=''}});
+$('#cf').addEventListener('submit',async e=>{e.preventDefault();const q=$('#cq').value.trim();if(q.length<2)return;$('#cres').innerHTML='<p class="note">찾는 중…</p>';
+  try{const j=await (await fetch('/api/yak?action=drug&q='+encodeURIComponent(q))).json(); if(!j.ok)throw new Error(j.error);
+    const list=j.items.filter(x=>!/취소|취하/.test(x.CANCEL_NAME||'')&&!/수출용/.test(x.ITEM_NAME||'')).slice(0,12);
+    $('#cres').innerHTML=list.length?list.map(x=>'<button type="button" class="addbtn" data-seq="'+esc(x.ITEM_SEQ)+'" data-name="'+esc(short(x.ITEM_NAME))+'"><span>'+esc(x.ITEM_NAME)+'<br><small>'+esc(x.ENTP_NAME)+' · '+(/전문/.test(x.SPCLTY_PBLC)?'전문':'일반')+'</small></span><span>＋ 추가</span></button>').join(''):'<p class="note">검색 결과가 없어요.</p>';
+  }catch(er){$('#cres').innerHTML='<p class="note">'+esc(er.message||'오류가 났어요.')+'</p>'}});
+$('#cres').addEventListener('click',e=>{const b=e.target.closest('[data-seq]');if(b){add(b.dataset.seq,b.dataset.name);$('#cres').innerHTML='';$('#cq').value='';$('#cq').focus()}});
+let mine=[];try{mine=JSON.parse(localStorage.getItem('yak_mine'))||[]}catch(e){}
+if(mine.length){$('#mineRow').innerHTML='★ 내 약에서 추가: '+mine.map(m=>'<button type="button" class="fchip" data-mseq="'+esc(m.seq)+'" data-mname="'+esc(m.name)+'">'+esc(m.name)+'</button>').join(' ');
+  $('#mineRow').addEventListener('click',e=>{const b=e.target.closest('[data-mseq]');if(b)add(b.dataset.mseq,b.dataset.mname)})}
+$('#go').addEventListener('click',async()=>{ $('#out').innerHTML='<p class="note">확인하는 중… (약이 많으면 10초쯤 걸려요)</p>';
+  try{const j=await (await fetch('/api/dur-check?seqs='+picked.map(p=>p.seq).sort().join(','))).json(); if(!j.ok)throw new Error(j.error);
+    const nm=s=>{const d=j.drugs.find(x=>x.seq===s);return d?d.name:s};
+    j.drugs.forEach(d=>{const p=picked.find(x=>x.seq===d.seq);if(p&&d.name)p.name=d.name}); draw();
+    let h='<h2>확인 결과</h2>';
+    if(!j.issues.length) h+='<div class="res ok"><b>✓ 등록된 금기나 중복이 없어요</b><p class="note" style="margin:6px 0 0">고른 '+j.drugs.length+'가지 약 사이에 식약처가 고시한 병용금기, 같은 성분 중복, 같은 종류 중복이 없어요. 그래도 처음 함께 먹는다면 약사에게 한 번 물어보세요.</p></div>';
+    else h+=j.issues.map(x=>'<div class="res '+x.level+'"><b>'+(x.level==='stop'?'⛔ ':'⚠ ')+esc(x.title)+'</b><p style="margin:6px 0 0"><b style="display:inline;font-size:15px">'+esc(nm(x.a))+'</b> + <b style="display:inline;font-size:15px">'+esc(nm(x.b))+'</b></p><p class="note" style="margin:4px 0 0">'+esc(x.detail)+(x.why&&x.why.length?'<br>'+x.why.map(esc).join('<br>'):'')+'</p></div>').join('');
+    h+='<p class="note" style="margin-top:12px">'+j.drugs.map(d=>'<a href="/drug/'+esc(d.seq)+'">'+esc(d.name)+'</a> 성분: '+esc(d.ingr.join(', ')||'정보 없음')).join('<br>')+'</p>';
+    $('#out').innerHTML=h;
+  }catch(er){$('#out').innerHTML='<p class="note">'+esc(er.message||'오류가 났어요.')+'</p>'}});
+const s0=new URLSearchParams(location.search).get('seqs');
+if(s0){picked=s0.split(',').filter(Boolean).slice(0,5).map(seq=>({seq,name:'품목 '+seq}));draw();if(picked.length>=2)$('#go').click()}
+}</script>
+<p style="margin-top:28px"><button class="btn" type="button" id="shareBtn">이 페이지 공유하기</button> <span class="note" id="shareMsg"></span></p>
+<script>{const b=document.getElementById('shareBtn'),m=document.getElementById('shareMsg');b.addEventListener('click',async()=>{const d={title:document.title,url:location.href};try{if(navigator.share){await navigator.share(d);return}await navigator.clipboard.writeText(location.href);m.textContent='주소를 복사했어요. 카톡에 붙여넣어 보내세요.'}catch(e){if(e&&e.name==='AbortError')return;m.textContent=location.href}})}</script>
+</div></main>
+<footer class="band"><div class="wrap">
+  <p><a href="/">약 검색</a> · <a href="/check">같이 먹어도 되나요?</a> · <a href="/pill">모양으로 약 찾기</a> · <a href="/pharmacy">지역별 약국 영업시간</a> · <a href="/convenience">편의점 상비약</a></p>
+  <p>약 정보: 식품의약품안전처 의약품 제품 허가정보·의약품개요정보(e약은요). 약국 정보: 국립중앙의료원 전국 약국 정보. 공공데이터포털(data.go.kr) 제공.</p>
+  <p>영업시간은 약국이 신고한 정보라 실제와 다를 수 있어요. 방문 전에 꼭 전화로 확인하세요. 이 사이트는 정보 안내만 하며 약을 팔지 않습니다. 복용은 약사나 의사와 상담하세요.</p>
+</div></footer>
+</body></html>

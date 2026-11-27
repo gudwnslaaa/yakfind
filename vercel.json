@@ -11,9 +11,26 @@
     },
     "api/drug-page.js": {
       "maxDuration": 30
+    },
+    "api/pill-index.js": {
+      "maxDuration": 60
+    },
+    "api/pill.js": {
+      "maxDuration": 60
+    },
+    "api/dur-check.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
+    {
+      "source": "/pill",
+      "destination": "/pill.html"
+    },
+    {
+      "source": "/check",
+      "destination": "/check.html"
+    },
     {
       "source": "/convenience",
       "destination": "/convenience.html"

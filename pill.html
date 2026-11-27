@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>알약 모양·색·글자로 무슨 약인지 찾기 | 이 약, 어디 있지?</title>
+<meta name="description" content="알약에 새겨진 글자, 모양, 색으로 식약처 낱알식별 정보 2만5천여 개 중에서 무슨 약인지 찾아보세요. 사진과 함께 보여드려요.">
+<link rel="canonical" href="https://yakfind.vercel.app/pill">
+
+<meta property="og:type" content="website"><meta property="og:site_name" content="이 약, 어디 있지?">
+<meta property="og:title" content="알약 모양·색·글자로 무슨 약인지 찾기 | 이 약, 어디 있지?"><meta property="og:description" content="알약에 새겨진 글자, 모양, 색으로 식약처 낱알식별 정보 2만5천여 개 중에서 무슨 약인지 찾아보세요. 사진과 함께 보여드려요.">
+<meta property="og:url" content="https://yakfind.vercel.app/pill"><meta property="og:image" content="https://yakfind.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#d1291f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23d1291f'/%3E%3Ctext x='32' y='45' font-size='38' font-weight='800' text-anchor='middle' fill='white' font-family='sans-serif'%3E%EC%95%BD%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@600;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>:root{color-scheme:light dark;--bg:light-dark(#ffffff,#15171a);--paper:light-dark(#f6f3ee,#1f2226);--ink:light-dark(#1b1d20,#eceae6);--mute:light-dark(#5f646b,#a3a7ad);--line:light-dark(#e3ded6,#33373c);--red:light-dark(#d1291f,#ff6a5e);--redbg:light-dark(#fdecea,#3a1f1d);--ok:light-dark(#1f6f45,#7fd3a3);--okbg:light-dark(#e6f4ec,#1d3327);--warnbg:light-dark(#fff1d6,#3a2e14);--warn:light-dark(#8a5a00,#f3c96b)}
+*{box-sizing:border-box;min-width:0}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Gothic A1","Noto Sans KR",sans-serif;line-height:1.2;text-wrap:balance;margin:0}a{color:inherit}
+.band{padding:clamp(18px,3vw,40px) max(5vw,16px)}.wrap{max-width:980px;margin:0 auto}
+header.band{border-bottom:1px solid var(--line);padding-top:16px;padding-bottom:16px}
+.top{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.brand{display:flex;gap:10px;align-items:center;text-decoration:none;font:800 20px "Gothic A1",sans-serif}
+.sign{width:38px;height:38px;border-radius:10px;background:var(--red);color:#fff;display:grid;place-items:center;font:800 22px/1 "Gothic A1",sans-serif}
+form.s{display:flex;gap:8px;flex:1;max-width:420px}form.s input{flex:1;height:44px;border:1px solid var(--line);border-radius:12px;padding:0 14px;font:inherit;font-size:16px;background:var(--bg);color:var(--ink)}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;font-weight:600;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn.red{background:var(--red);border-color:var(--red);color:#fff}.btn.ink{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.crumb{font-size:14px;color:var(--mute);margin-bottom:10px}.crumb a{color:var(--mute)}
+h1{font-size:clamp(26px,4vw,40px);font-weight:800}h2{font-size:21px;font-weight:800;margin:32px 0 12px}
+.sub{color:var(--mute);margin:6px 0 0}
+.tag{display:inline-block;font-size:13px;font-weight:600;border-radius:6px;padding:1px 8px;white-space:nowrap}
+.rx{background:var(--redbg);color:var(--red)}.otc,.open{background:var(--okbg);color:var(--ok)}.soon,.late{background:var(--warnbg);color:var(--warn)}.closed{background:var(--paper);color:var(--mute)}
+.photo{display:block;width:100%;max-width:560px;border-radius:14px;overflow:hidden;border:1px solid var(--line);margin:18px 0 6px;background:#fff}.photo img{display:block;width:100%;aspect-ratio:780/426;object-fit:cover}
+.cap{font-size:13px;color:var(--mute);margin:0 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chips span{background:var(--paper);border-radius:8px;padding:4px 10px;font-weight:500}
+.box{background:var(--paper);border-radius:16px;padding:18px 20px;margin:20px 0}.box.cta{border-top:5px solid var(--red)}
+.sec p{margin:6px 0 0;white-space:pre-line;max-width:72ch}
+.list{display:flex;flex-direction:column;gap:8px;list-style:none;padding:0;margin:0}
+.it{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-decoration:none;color:var(--ink)}a.it:hover{border-color:var(--ink)}
+.it b{display:block}.it small{color:var(--mute);font-size:14px}
+.thumb{flex:none;width:64px;height:44px;border-radius:8px;background:var(--paper);overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;list-style:none;padding:0;margin:0}
+.grid a{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-decoration:none}.grid a:hover{border-color:var(--ink)}.grid small{color:var(--mute)}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}.stats div{background:var(--paper);border-radius:12px;padding:10px 16px}.stats b{font-size:22px;display:block}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.fchip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;font:inherit;font-weight:500}.fchip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ph{border:1px solid var(--line);border-radius:14px;padding:14px 16px}.ph .hd{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.ph h3{font-size:18px}
+.ph .addr{color:var(--mute);font-size:14px;margin:2px 0 8px}.ph .badges{display:flex;gap:6px;flex-wrap:wrap}
+.hrs{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin:10px 0;font-size:13px;text-align:center}
+.hrs div{background:var(--paper);border-radius:8px;padding:6px 2px}.hrs b{display:block;font-size:12px;color:var(--mute);font-weight:500}.hrs .off{opacity:.55}.hrs .today{outline:2px solid var(--red)}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.note{font-size:14px;color:var(--mute)}
+li.dur{border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:12px;padding:10px 14px}li.dur b{display:block}li.dur small{color:var(--mute);font-size:14px}li.dur a{color:var(--ink)}
+footer{border-top:1px solid var(--line);color:var(--mute);font-size:14px;margin-top:40px}footer p{margin:4px 0;max-width:80ch}footer a{color:var(--mute)}
+@media(max-width:600px){.hrs{grid-template-columns:repeat(4,minmax(0,1fr))}form.s{max-width:none;flex-basis:100%}}</style>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</head><body>
+<header class="band"><div class="wrap top">
+  <a class="brand" href="/"><span class="sign" aria-hidden="true">약</span>이 약, 어디 있지?</a>
+  <form class="s" action="/" method="get" role="search"><input name="q" type="search" placeholder="약 이름 검색" aria-label="약 이름" required minlength="2"><button class="btn ink" type="submit">찾기</button></form>
+</div></header>
+<main class="band"><div class="wrap">
+<nav class="crumb"><a href="/">약 검색</a> › 모양으로 약 찾기</nav>
+<h1>이 알약, 무슨 약이지?</h1>
+<p class="sub">알약에 새겨진 글자, 모양, 색을 고르면 식약처 낱알식별 정보 2만5천여 개 중에서 찾아 드려요. 글자를 넣으면 가장 정확해요.</p>
+<form id="pf" class="box" style="display:grid;gap:16px">
+  <label><b>알약에 적힌 글자·숫자</b> <small class="note">앞면이나 뒷면, 한쪽만 넣어도 돼요</small><br><input id="pp" type="search" placeholder="예: TYLENOL, YH, 500" style="margin-top:8px;width:100%;height:48px;border:1px solid var(--line);border-radius:12px;padding:0 14px;font:inherit;font-size:16px;background:var(--bg);color:var(--ink)"></label>
+  <div><b>모양</b><div class="chips2" id="shapes"><button type="button" class="fchip on" data-shape="">상관없음</button><button type="button" class="fchip" data-shape="원형">원형</button><button type="button" class="fchip" data-shape="타원형">타원형</button><button type="button" class="fchip" data-shape="장방형">장방형</button><button type="button" class="fchip" data-shape="반원형">반원형</button><button type="button" class="fchip" data-shape="삼각형">삼각형</button><button type="button" class="fchip" data-shape="사각형">사각형</button><button type="button" class="fchip" data-shape="마름모형">마름모형</button><button type="button" class="fchip" data-shape="오각형">오각형</button><button type="button" class="fchip" data-shape="육각형">육각형</button><button type="button" class="fchip" data-shape="팔각형">팔각형</button><button type="button" class="fchip" data-shape="기타">기타</button></div></div>
+  <div><b>색</b><div class="chips2" id="colors"><button type="button" class="fchip on" data-color="">상관없음</button><button type="button" class="fchip" data-color="하양"><i style="background:#ffffff"></i>하양</button><button type="button" class="fchip" data-color="노랑"><i style="background:#f6d33c"></i>노랑</button><button type="button" class="fchip" data-color="주황"><i style="background:#f39a2b"></i>주황</button><button type="button" class="fchip" data-color="분홍"><i style="background:#f4a6c0"></i>분홍</button><button type="button" class="fchip" data-color="빨강"><i style="background:#d93a3a"></i>빨강</button><button type="button" class="fchip" data-color="갈색"><i style="background:#8b5a2b"></i>갈색</button><button type="button" class="fchip" data-color="연두"><i style="background:#a8d65a"></i>연두</button><button type="button" class="fchip" data-color="초록"><i style="background:#2f9e4f"></i>초록</button><button type="button" class="fchip" data-color="청록"><i style="background:#1aa3a3"></i>청록</button><button type="button" class="fchip" data-color="파랑"><i style="background:#2f6fd6"></i>파랑</button><button type="button" class="fchip" data-color="남색"><i style="background:#23337a"></i>남색</button><button type="button" class="fchip" data-color="자주"><i style="background:#a23a7a"></i>자주</button><button type="button" class="fchip" data-color="보라"><i style="background:#8255c9"></i>보라</button><button type="button" class="fchip" data-color="회색"><i style="background:#9aa0a6"></i>회색</button><button type="button" class="fchip" data-color="검정"><i style="background:#222222"></i>검정</button><button type="button" class="fchip" data-color="투명"><i style="background:linear-gradient(135deg,#eef3f7,#cfd9e2)"></i>투명</button></div></div>
+  <div><b>종류</b><div class="chips2" id="forms"><button type="button" class="fchip on" data-form="">상관없음</button><button type="button" class="fchip" data-form="정제">알약(정제)</button><button type="button" class="fchip" data-form="경질캡슐">딱딱한 캡슐</button><button type="button" class="fchip" data-form="연질캡슐">말랑한 캡슐</button></div></div>
+  <div><b>가운데 쪼개는 선(분할선)</b><div class="chips2" id="lines"><button type="button" class="fchip on" data-line="">상관없음</button><button type="button" class="fchip" data-line="yes">있음</button><button type="button" class="fchip" data-line="no">없음</button></div></div>
+  <p style="margin:0"><button class="btn red" type="submit">알약 찾기</button></p>
+</form>
+<div id="pout"></div>
+<div class="box"><b>모르는 약은 먹지 마세요</b><p class="note" style="margin:6px 0 0">사진과 정보가 비슷해도 다른 약일 수 있어요. 확실하지 않으면 약을 들고 가까운 약국에 가서 확인하세요. 아이나 반려동물이 삼켰다면 바로 119나 병원에 연락하세요.</p></div>
+<style>.chips2{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.chips2 i{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid var(--line);margin-right:6px;vertical-align:-2px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;list-style:none;padding:0;margin:12px 0}
+.pgrid a{display:block;border:1px solid var(--line);border-radius:14px;overflow:hidden;text-decoration:none;color:var(--ink)}.pgrid a:hover{border-color:var(--ink)}
+.pgrid img{display:block;width:100%;aspect-ratio:780/426;object-fit:cover;background:#fff}.pgrid .noimg{aspect-ratio:780/426;background:var(--paper)}
+.pgrid div{padding:10px 12px}.pgrid b{display:block;font-size:15px}.pgrid small{color:var(--mute);font-size:13px;display:block}</style>
+<script>{
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const st={shape:'',color:'',form:'',line:''};
+for(const [id,k] of [['#shapes','shape'],['#colors','color'],['#forms','form'],['#lines','line']])
+  $(id).addEventListener('click',e=>{const b=e.target.closest('[data-'+k+']');if(!b)return;st[k]=b.dataset[k];for(const x of $(id).children)x.classList.toggle('on',x===b)});
+$('#pf').addEventListener('submit',async e=>{e.preventDefault();
+  const print=$('#pp').value.trim();
+  if(!print&&!st.shape&&!st.color){$('#pout').innerHTML='<p class="note">글자, 모양, 색 중 하나 이상을 골라 주세요.</p>';return}
+  $('#pout').innerHTML='<p class="note">찾는 중… 처음 한 번은 전체 목록을 받느라 20~30초 걸릴 수 있어요.</p>';
+  const p=new URLSearchParams({...st,print});for(const [k,v] of [...p])if(!v)p.delete(k);
+  try{history.replaceState(null,'','/pill?'+p)}catch(er){}
+  try{const j=await (await fetch('/api/pill?'+p)).json();if(!j.ok)throw new Error(j.error);
+    if(!j.total){$('#pout').innerHTML='<h2>찾은 알약 0개</h2><p class="note">조건을 하나씩 빼 보세요. 글자는 일부만 넣어도 돼요(예: TYLENOL → TYL).</p>';return}
+    $('#pout').innerHTML='<h2>찾은 알약 '+j.total+'개'+(j.total>80?' <small class="note">앞의 80개만 보여요. 조건을 더 골라 보세요.</small>':'')+'</h2>'+(j.partial?'<p class="note">일부 목록을 받지 못해 결과가 빠졌을 수 있어요.</p>':'')+
+    '<ul class="pgrid">'+j.items.map(r=>{const img=r[12]?(r[12].startsWith('http')?r[12]:'https://nedrug.mfds.go.kr/pbp/cmn/itemImageDownload/'+r[12]):'';
+      return '<li><a href="/drug/'+esc(r[0])+'">'+(img?'<img src="'+esc(img)+'" alt="'+esc(r[1])+' 낱알 사진" loading="lazy">':'<span class="noimg" style="display:block"></span>')+'<div><b>'+esc(r[1])+'</b><small>'+esc(r[2])+' · '+esc(r[11])+'</small><small>'+esc([r[3],[r[4],r[5]].filter(Boolean).join('/'),r[6]?'앞 '+r[6]:'',r[7]?'뒤 '+r[7]:'',r[13]?r[13]+'×'+r[14]+'mm':''].filter(Boolean).join(' · '))+'</small></div></a></li>'}).join('')+'</ul>';
+  }catch(er){$('#pout').innerHTML='<p class="note">'+esc(er.message||'오류가 났어요.')+'</p>'}});
+const u=new URLSearchParams(location.search);
+if([...u].length){$('#pp').value=u.get('print')||'';for(const [id,k] of [['#shapes','shape'],['#colors','color'],['#forms','form'],['#lines','line']]){const v=u.get(k)||'';const b=[...$(id).children].find(x=>x.dataset[k]===v);if(b)b.click()}$('#pf').requestSubmit()}
+}</script>
+<p style="margin-top:28px"><button class="btn" type="button" id="shareBtn">이 페이지 공유하기</button> <span class="note" id="shareMsg"></span></p>
+<script>{const b=document.getElementById('shareBtn'),m=document.getElementById('shareMsg');b.addEventListener('click',async()=>{const d={title:document.title,url:location.href};try{if(navigator.share){await navigator.share(d);return}await navigator.clipboard.writeText(location.href);m.textContent='주소를 복사했어요. 카톡에 붙여넣어 보내세요.'}catch(e){if(e&&e.name==='AbortError')return;m.textContent=location.href}})}</script>
+</div></main>
+<footer class="band"><div class="wrap">
+  <p><a href="/">약 검색</a> · <a href="/check">같이 먹어도 되나요?</a> · <a href="/pill">모양으로 약 찾기</a> · <a href="/pharmacy">지역별 약국 영업시간</a> · <a href="/convenience">편의점 상비약</a></p>
+  <p>약 정보: 식품의약품안전처 의약품 제품 허가정보·의약품개요정보(e약은요). 약국 정보: 국립중앙의료원 전국 약국 정보. 공공데이터포털(data.go.kr) 제공.</p>
+  <p>영업시간은 약국이 신고한 정보라 실제와 다를 수 있어요. 방문 전에 꼭 전화로 확인하세요. 이 사이트는 정보 안내만 하며 약을 팔지 않습니다. 복용은 약사나 의사와 상담하세요.</p>
+</div></footer>
+</body></html>
