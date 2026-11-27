@@ -98,6 +98,14 @@ export function hoursOf(p) {
 export const isLate = h => { if (!h) return false; const c = toMin(h.c), s = toMin(h.s); return c !== null && (c >= 1320 || (s !== null && c <= s)); };
 export const is24 = h => { if (!h) return false; const c = toMin(h.c), s = toMin(h.s); return (s === 0 && c >= 1440) || s === c; };
 
+// 가짜·빈 전화번호(000-0000 등) 거르기
+export const realTel = t => { const d = String(t || '').replace(/\D/g, ''); return d.length >= 8 && !/^0\d{1,2}0{6,}$/.test(d) && !/0000000/.test(d) ? clean(t) : ''; };
+// 같은 약국 중복(띄어쓰기만 다른 이름 + 같은 주소) 거르기
+export function dedupe(list) {
+  const seen = new Set();
+  return list.filter(p => { const k = clean(p.DUTYNAME).replace(/\s/g, '') + '|' + clean(p.DUTYADDR).replace(/\s/g, '').replace(/\(.*\)$/, ''); if (seen.has(k)) return false; seen.add(k); return true; });
+}
+
 // ---- 지역 ----
 export const SIDO = ['서울특별시','부산광역시','대구광역시','인천광역시','광주광역시','대전광역시','울산광역시','세종특별자치시','경기도','강원특별자치도','충청북도','충청남도','전북특별자치도','전라남도','경상북도','경상남도','제주특별자치도'];
 // 주소 → { label: '용인시 수지구', q: '수지구', slug: '용인시-수지구' }  (세종처럼 시·군·구가 없으면 null)

@@ -1,5 +1,5 @@
 // /pharmacy, /pharmacy/시도, /pharmacy/시도/시군구 → 지역별 약국 영업시간 페이지
-import { callAll, esc, clean, DAYS, hoursOf, isLate, is24, SIDO, regionOf, page, sendHtml, notFound, failPage, getQuery } from './_lib.js';
+import { callAll, esc, clean, realTel, dedupe, DAYS, hoursOf, isLate, is24, SIDO, regionOf, page, sendHtml, notFound, failPage, getQuery } from './_lib.js';
 
 const dec = v => { try { return decodeURIComponent(String(v || '')); } catch { return String(v || ''); } };
 const WEEK = 604800;
@@ -9,13 +9,13 @@ async function fetchArea(sido, gu) {
   if (gu) params.Q1 = gu;
   const d = await callAll('area', params, 500, gu ? 6 : 30, 6);
   const seen = new Set();
-  return d.items.filter(p => p.HPID ? !seen.has(p.HPID) && seen.add(p.HPID) : true);
+  return dedupe(d.items.filter(p => p.HPID ? !seen.has(p.HPID) && seen.add(p.HPID) : true));
 }
 
 function card(p) {
   const h = hoursOf(p);
   const sun = !!h[6], hol = !!h[7], late = h.slice(0, 5).some(isLate), all24 = h.slice(0, 7).some(is24);
-  const tel = clean(p.DUTYTEL1), name = clean(p.DUTYNAME), addr = clean(p.DUTYADDR);
+  const tel = realTel(p.DUTYTEL1), name = clean(p.DUTYNAME), addr = clean(p.DUTYADDR);
   const lat = parseFloat(p.WGS84LAT), lon = parseFloat(p.WGS84LON);
   const map = !isNaN(lat) && !isNaN(lon) ? `https://map.kakao.com/link/map/${encodeURIComponent(name)},${lat},${lon}` : `https://map.naver.com/p/search/${encodeURIComponent(name + ' ' + addr.split(' ').slice(0, 2).join(' '))}`;
   const data = h.map(x => x ? `${x.s}-${x.c}` : '').join('|');
@@ -64,7 +64,7 @@ function listPage(res, sido, label, slug, items) {
 <p class="note" style="margin-top:20px">영업시간은 약국이 국립중앙의료원에 신고한 정보예요. 시간이 등록되지 않은 요일은 휴무로 표시했어요. 임시 휴무나 시간 변경은 반영되지 않을 수 있으니 방문 전에 전화로 확인하세요.</p>
 ${CLIENT}`;
   const jsonld = { '@context': 'https://schema.org', '@type': 'ItemList', name: `${place} 약국`, numberOfItems: items.length,
-    itemListElement: items.slice(0, 100).map((p, i) => ({ '@type': 'ListItem', position: i + 1, item: { '@type': 'Pharmacy', name: clean(p.DUTYNAME), telephone: clean(p.DUTYTEL1) || undefined,
+    itemListElement: items.slice(0, 100).map((p, i) => ({ '@type': 'ListItem', position: i + 1, item: { '@type': 'Pharmacy', name: clean(p.DUTYNAME), telephone: realTel(p.DUTYTEL1) || undefined,
       address: clean(p.DUTYADDR), ...(p.WGS84LAT ? { geo: { '@type': 'GeoCoordinates', latitude: +p.WGS84LAT, longitude: +p.WGS84LON } } : {}) } })) };
   const path = '/pharmacy/' + encodeURIComponent(sido) + (slug ? '/' + encodeURIComponent(slug) : '');
   sendHtml(res, 200, page({ title: `${short} 약국 ${items.length}곳 영업시간 — 일요일·공휴일·심야 약국 | 이 약, 어디 있지?`,
