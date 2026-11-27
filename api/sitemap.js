@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   try {
     let urls = [];
     if (type === 'home') {
-      urls = [`${SITE}/`, `${SITE}/pharmacy`];
+      urls = [`${SITE}/`, `${SITE}/pharmacy`, `${SITE}/convenience`];
     } else if (type === 'drugs') {
       // e약은요에 실린 일반의약품 (효능·사용법 정보가 있는 약)
       const d = await callAll('easy', { type: 'json' }, 100, 80, 8);

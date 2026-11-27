@@ -12,6 +12,7 @@ const ROUTES = {
   drug: '/1471000/DrugPrdtPrmsnInfoService08/getDrugPrdtPrmsnInq08',
   ingr: '/1471000/DrugPrdtPrmsnInfoService08/getDrugPrdtPrmsnInq08',
   easy: '/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList',
+  symptom: '/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList',
   near: '/B552657/ErmctInsttInfoInqireService/getParmacyLcinfoInqire',
   area: '/B552657/ErmctInsttInfoInqireService/getParmacyListInfoInqire',
 };
@@ -77,6 +78,10 @@ export default async function handler(req, res) {
     const s = arg(q, 'q');
     if (s.length < 2) return send(res, 400, { ok: false, error: '두 글자 이상 입력해 주세요.' });
     Object.assign(p, action === 'drug' ? { item_name: s, numOfRows: 40 } : { item_ingr_name: s, numOfRows: 100 }, { type: 'json' });
+  } else if (action === 'symptom') {
+    const s = arg(q, 'q', 20);
+    if (s.length < 2) return send(res, 400, { ok: false, error: '증상을 두 글자 이상 입력해 주세요.' });
+    Object.assign(p, { efcyQesitm: s, numOfRows: 100, type: 'json' });
   } else if (action === 'easy') {
     const seq = arg(q, 'seq', 20).replace(/\D/g, '');
     if (!seq) return send(res, 400, { ok: false, error: '품목코드가 없습니다.' });

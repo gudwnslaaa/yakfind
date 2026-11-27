@@ -179,7 +179,10 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(
   <a class="brand" href="/"><span class="sign" aria-hidden="true">약</span>이 약, 어디 있지?</a>
   <form class="s" action="/" method="get" role="search"><input name="q" type="search" placeholder="약 이름 검색" aria-label="약 이름" required minlength="2"><button class="btn ink" type="submit">찾기</button></form>
 </div></header>
-<main class="band"><div class="wrap">${body}</div></main>
+<main class="band"><div class="wrap">${body}
+<p style="margin-top:28px"><button class="btn" type="button" id="shareBtn">이 페이지 공유하기</button> <span class="note" id="shareMsg"></span></p>
+<script>{const b=document.getElementById('shareBtn'),m=document.getElementById('shareMsg');b.addEventListener('click',async()=>{const d={title:document.title,url:location.href};try{if(navigator.share){await navigator.share(d);return}await navigator.clipboard.writeText(location.href);m.textContent='주소를 복사했어요. 카톡에 붙여넣어 보내세요.'}catch(e){if(e&&e.name==='AbortError')return;m.textContent=location.href}})}</script>
+</div></main>
 <footer class="band"><div class="wrap">
   <p><a href="/">약 검색</a> · <a href="/pharmacy">지역별 약국 영업시간</a></p>
   <p>약 정보: 식품의약품안전처 의약품 제품 허가정보·의약품개요정보(e약은요). 약국 정보: 국립중앙의료원 전국 약국 정보. 공공데이터포털(data.go.kr) 제공.</p>
