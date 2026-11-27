@@ -21,8 +21,9 @@ export default async function handler(req, res) {
       ]);
       const ing = p ? ingredients(p) : [];
       return {
-        seq, name: p ? shortName(p.ITEM_NAME) : seq,
-        ingr: ing.map(x => ({ en: x, ko: koName(x), key: ingrKey(x) })),
+        seq, name: p ? shortName(p.ITEM_NAME) : (tab.items[0] && tab.items[0].ITEM_SEQ === seq ? shortName(tab.items[0].ITEM_NAME) : (ef.items[0] && ef.items[0].ITEM_NAME ? shortName(ef.items[0].ITEM_NAME) : seq)),
+        ingr: (ing.length ? ing.map(x => ({ en: x, ko: koName(x), key: ingrKey(x) }))
+          : [...new Map(tab.items.concat(ef.items).filter(r => r.INGR_ENG_NAME).map(r => [ingrKey(r.INGR_ENG_NAME), { en: r.INGR_ENG_NAME, ko: nz(r.INGR_KOR_NAME) || nz(r.INGR_NAME), key: ingrKey(r.INGR_ENG_NAME) }])).values()]),
         taboo: tab.items.filter(r => !r.ITEM_SEQ || r.ITEM_SEQ === seq),
         effects: [...new Set(ef.items.filter(r => !r.ITEM_SEQ || r.ITEM_SEQ === seq).map(r => nz(r.EFFECT_NAME)).filter(Boolean))],
       };
@@ -38,7 +39,7 @@ export default async function handler(req, res) {
           const mk = ingrKey(r.MIXTURE_INGR_ENG_NAME || '');
           if (r.MIXTURE_ITEM_SEQ === Y.seq || yKeys.some(k => keyMatch(k, mk))) {
             const w = nz(r.PROHBT_CONTENT); if (w) why.add(w);
-            via.add(`${nz(r.INGR_KOR_NAME) || nz(r.INGR_ENG_NAME)} + ${nz(r.MIXTURE_INGR_KOR_NAME) || nz(r.MIXTURE_INGR_ENG_NAME)}`);
+            via.add([nz(r.INGR_KOR_NAME) || nz(r.INGR_ENG_NAME), nz(r.MIXTURE_INGR_KOR_NAME) || nz(r.MIXTURE_INGR_ENG_NAME)].sort().join(' + '));
           }
         }
       }

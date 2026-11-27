@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   try {
     const base = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
     const parts = await Promise.all(Array.from({ length: PARTS }, (_, i) => fetch(`${base}/api/pill-index?part=${i}`, { signal: AbortSignal.timeout(55000) }).then(r => r.json()).catch(() => null)));
-    const failed = parts.filter(p => !p || !p.ok).length;
+    const failed = parts.filter(p => !p || !p.ok || p.missing).length;
     const rows = parts.flatMap(p => (p && p.ok ? p.rows : []));
     const hit = rows.filter(r => {
       const [, , , sh, c1, c2, pf, pb, lf, lb, fm] = r;

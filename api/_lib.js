@@ -106,11 +106,22 @@ export async function findPermit(seq) {
     const hit = d.items.find(x => x.ITEM_SEQ === seq);
     if (hit) return hit;
   } catch (e) { /* 아래 방법으로 */ }
-  const e = await call('easy', { itemSeq: seq, numOfRows: 1, type: 'json' }).catch(() => null);
-  const name = e && e.items[0] && e.items[0].ITEMNAME;
+  // 이름을 다른 자료에서 찾아 이름으로 다시 조회 (e약은요 → 낱알식별 → DUR 순)
+  const [e, pl, du] = await Promise.all([
+    call('easy', { itemSeq: seq, numOfRows: 1, type: 'json' }).catch(() => null),
+    call('pill', { item_seq: seq, numOfRows: 3, type: 'json' }).catch(() => null),
+    call('durList', { itemSeq: seq, numOfRows: 3, type: 'json' }).catch(() => null),
+  ]);
+  const pick = (d, k) => d && (d.items.find(x => (x.ITEMSEQ || x.ITEM_SEQ) === seq) || {})[k];
+  const name = pick(e, 'ITEMNAME') || pick(pl, 'ITEM_NAME') || pick(du, 'ITEM_NAME');
   if (!name) return null;
-  const d = await call('permit', { item_name: shortName(name).slice(0, 30), numOfRows: 100, type: 'json' });
-  return d.items.find(x => x.ITEM_SEQ === seq) || null;
+  for (const q of [shortName(name).slice(0, 30), shortName(name).replace(/[\d.]+\s*(밀리그램|밀리그람|mg|그램|g).*$/i, '').slice(0, 20)]) {
+    if (!q) continue;
+    const d = await call('permit', { item_name: q, numOfRows: 100, type: 'json' }).catch(() => null);
+    const hit = d && d.items.find(x => x.ITEM_SEQ === seq);
+    if (hit) return hit;
+  }
+  return null;
 }
 
 // ---- DUR (의약품 안전사용 정보) ----
