@@ -1,3 +1,15 @@
 {
-  "regions": ["icn1"]
+  "regions": ["icn1"],
+  "functions": {
+    "api/sitemap.js": { "maxDuration": 60 },
+    "api/region-page.js": { "maxDuration": 60 },
+    "api/drug-page.js": { "maxDuration": 30 }
+  },
+  "rewrites": [
+    { "source": "/drug/:seq", "destination": "/api/drug-page?seq=:seq" },
+    { "source": "/pharmacy", "destination": "/api/region-page" },
+    { "source": "/pharmacy/:sido", "destination": "/api/region-page?sido=:sido" },
+    { "source": "/pharmacy/:sido/:gu", "destination": "/api/region-page?sido=:sido&gu=:gu" },
+    { "source": "/sitemaps/:type.xml", "destination": "/api/sitemap?type=:type" }
+  ]
 }

@@ -185,6 +185,7 @@ footer p{margin:4px 0;max-width:80ch}
 <dialog class="lb" id="lb"><img id="lbImg" alt=""><p id="lbCap"></p></dialog>
 <footer class="band">
   <div class="wrap">
+    <p><a href="/pharmacy">지역별 약국 영업시간 (일요일·공휴일·심야)</a></p>
     <p>약 정보: 식품의약품안전처 의약품 제품 허가정보·의약품개요정보(e약은요). 약국 정보: 국립중앙의료원 전국 약국 정보. 공공데이터포털(data.go.kr) 제공.</p>
     <p>약국 재고는 공개된 정보가 없어서 보여드리지 않아요. 영업시간은 등록된 정보 기준이라 공휴일이나 임시 휴무와 다를 수 있으니 전화로 확인해 주세요.</p>
     <p>이 사이트는 정보 안내만 하며 약을 팔지 않습니다. 복용은 반드시 약사나 의사와 상담하세요.</p>
@@ -290,7 +291,8 @@ async function select(i) {
       <div><b>성분</b>${ing.length ? `<div class="ingr">${ing.map(x => `<span>${esc(showIngr(x))}</span>`).join('')}</div>` : '<p class="note">성분 정보가 없어요.</p>'}</div>
       ${isRx(d) ? '<p class="warn">전문의약품이라 처방전이 있어야 살 수 있어요. 처방전을 받았다면 약국에 이 약이 있는지 전화로 먼저 물어보세요.</p>' : ''}
       <div id="easy"></div>
-      ${ing.length ? '<div class="row"><button class="btn" id="sameBtn" type="button">같은 성분 제품 보기</button></div><div id="same" class="same"></div>' : ''}
+      <div class="row">${ing.length ? '<button class="btn" id="sameBtn" type="button">같은 성분 제품 보기</button>' : ''}${d.ITEM_SEQ ? `<a class="btn" href="/drug/${esc(d.ITEM_SEQ)}">약 정보 페이지 (공유용)</a>` : ''}</div>
+      ${ing.length ? '<div id="same" class="same"></div>' : ''}
     </article>`;
   drawScript();
   if ($('#sameBtn')) $('#sameBtn').addEventListener('click', () => same(d));
@@ -323,7 +325,7 @@ async function same(d) {
     const rows = j.items.filter(alive).filter(x => x.ITEM_SEQ !== d.ITEM_SEQ);
     const exact = rows.filter(x => ingrSet(x) === key);
     const mixed = rows.filter(x => !exact.includes(x));
-    const card = x => `<div class="item">${thumb(x)}<div style="flex:1"><b>${esc(nameOf(x))}</b><span>${esc(clean(x.ENTP_NAME))}</span></div>${x.SPCLTY_PBLC ? `<span class="tag ${isRx(x) ? 'rx' : 'otc'}">${isRx(x) ? '전문' : '일반'}</span>` : ''}</div>`;
+    const card = x => `<a class="item" style="text-decoration:none;cursor:pointer" href="/drug/${esc(x.ITEM_SEQ)}">${thumb(x)}<div style="flex:1"><b>${esc(nameOf(x))}</b><span>${esc(clean(x.ENTP_NAME))}</span></div>${x.SPCLTY_PBLC ? `<span class="tag ${isRx(x) ? 'rx' : 'otc'}">${isRx(x) ? '전문' : '일반'}</span>` : ''}</a>`;
     let h = '';
     h += `<p><b>성분 구성이 같은 제품 ${exact.length}개</b></p>`;
     h += exact.length ? `<div class="list">${exact.slice(0, 30).map(card).join('')}</div>` : '<p class="note">성분 구성이 똑같은 다른 제품을 찾지 못했어요.</p>';
