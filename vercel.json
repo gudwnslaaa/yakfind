@@ -23,9 +23,16 @@
     },
     "api/topic-page.js": {
       "maxDuration": 30
+    },
+    "api/er.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
+    {
+      "source": "/er",
+      "destination": "/er.html"
+    },
     {
       "source": "/symptom/:name",
       "destination": "/api/topic-page?type=symptom&name=:name"
