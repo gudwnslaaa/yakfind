@@ -40,6 +40,7 @@ a{color:inherit}
 .wrap{max-width:1180px;margin:0 auto}
 header.band{border-bottom:1px solid var(--line);padding-bottom:28px}
 .brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+a.home{color:inherit;text-decoration:none;border-radius:12px}a.home:hover h1,h1 a.home:hover{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px;text-decoration-color:var(--red)}
 .sign{width:52px;height:52px;border-radius:12px;background:var(--red);color:#fff;display:grid;place-items:center;font:800 30px/1 "Gothic A1",sans-serif;flex:none}
 h1{font-size:clamp(28px,4.6vw,46px);font-weight:800}
 .lead{color:var(--mute);margin:6px 0 0;max-width:60ch}
@@ -127,8 +128,8 @@ footer p{margin:4px 0;max-width:80ch}
 <body>
 <header class="band">
   <div class="wrap">
-    <div class="brand"><div class="sign" aria-hidden="true">약</div>
-      <div><h1>이 약, 어디 있지?</h1>
+    <div class="brand"><a class="home" href="/" aria-label="처음 화면으로"><span class="sign" aria-hidden="true">약</span></a>
+      <div><h1><a class="home" href="/">이 약, 어디 있지?</a></h1>
       <p class="lead">약 이름을 넣으면 성분과 같은 성분 제품을 알려드려요. 지금 문 연 가까운 약국에 바로 전화해 보세요.</p></div>
     </div>
     <form class="search" id="f" role="search">
