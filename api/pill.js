@@ -10,7 +10,10 @@ export default async function handler(req, res) {
   if (!shape && !color && !print) return send(400, { ok: false, error: '모양, 색, 글자 중 하나 이상을 골라 주세요.' });
   try {
     const base = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
-    const parts = await Promise.all(Array.from({ length: PARTS }, (_, i) => fetch(`${base}/api/pill-index?part=${i}`, { signal: AbortSignal.timeout(55000) }).then(r => r.json()).catch(() => null)));
+    // 공공데이터 서버가 동시 요청을 거절하므로 두 조각씩 차례로 (저장된 뒤에는 금방 끝남)
+    const one = i => fetch(`${base}/api/pill-index?part=${i}`, { signal: AbortSignal.timeout(50000) }).then(r => r.json()).catch(() => null);
+    const parts = [];
+    for (let i = 0; i < PARTS; i += 2) parts.push(...await Promise.all([one(i), i + 1 < PARTS ? one(i + 1) : null].filter(Boolean)));
     const failed = parts.filter(p => !p || !p.ok || p.missing).length;
     const rows = parts.flatMap(p => (p && p.ok ? p.rows : []));
     const hit = rows.filter(r => {
