@@ -1,18 +1,16 @@
 // 임시 확인용: 새 API 주소가 맞는지 시험 (확인 후 삭제)
 const KEY = process.env.DATA_GO_KR_KEY;
 const C = [
-  ['dur3-usjnt', '/1471000/DURPrdlstInfoService03/getUsjntTabooInfoList03', { itemName: '타이레놀', type: 'json', numOfRows: 2 }],
-  ['dur3-prdlst', '/1471000/DURPrdlstInfoService03/getDurPrdlstInfoList03', { itemName: '타이레놀', type: 'json', numOfRows: 2 }],
-  ['dur3-pwnm', '/1471000/DURPrdlstInfoService03/getPwnmTabooInfoList03', { itemName: '타이레놀', type: 'json', numOfRows: 2 }],
-  ['dur3-agrde', '/1471000/DURPrdlstInfoService03/getSpcifyAgrdeTabooInfoList03', { itemName: '아스피린', type: 'json', numOfRows: 2 }],
-  ['dur3-odsn', '/1471000/DURPrdlstInfoService03/getOdsnAtentInfoList03', { type: 'json', numOfRows: 2 }],
-  ['dur3-efcy', '/1471000/DURPrdlstInfoService03/getEfcyDplctInfoList03', { itemName: '타이레놀', type: 'json', numOfRows: 2 }],
-  ['dur3-cpcty', '/1471000/DURPrdlstInfoService03/getCpctyAtentInfoList03', { type: 'json', numOfRows: 2 }],
-  ['dur2-usjnt', '/1471000/DURPrdlstInfoService02/getUsjntTabooInfoList02', { itemName: '타이레놀', type: 'json', numOfRows: 2 }],
-  ['pill2', '/1471000/MdcinGrnIdntfcInfoService02/getMdcinGrnIdntfcInfoList02', { item_name: '타이레놀', type: 'json', numOfRows: 2 }],
-  ['pill3', '/1471000/MdcinGrnIdntfcInfoService03/getMdcinGrnIdntfcInfoList03', { item_name: '타이레놀', type: 'json', numOfRows: 2 }],
-  ['pill1', '/1471000/MdcinGrnIdntfcInfoService01/getMdcinGrnIdntfcInfoList01', { item_name: '타이레놀', type: 'json', numOfRows: 2 }],
-  ['pill2-big', '/1471000/MdcinGrnIdntfcInfoService02/getMdcinGrnIdntfcInfoList02', { type: 'json', numOfRows: 1000 }],
+  ['usjnt-alpra', '/1471000/DURPrdlstInfoService03/getUsjntTabooInfoList03', { itemName: '자낙스', type: 'json', numOfRows: 2 }],
+  ['usjnt-seq', '/1471000/DURPrdlstInfoService03/getUsjntTabooInfoList03', { itemSeq: '202106092', type: 'json', numOfRows: 2 }],
+  ['agrde-lop', '/1471000/DURPrdlstInfoService03/getSpcifyAgrdeTabooInfoList03', { itemName: '로페라미드', type: 'json', numOfRows: 2 }],
+  ['pwnm-isotre', '/1471000/DURPrdlstInfoService03/getPwnmTabooInfoList03', { itemName: '이소트레티노인', type: 'json', numOfRows: 2 }],
+  ['odsn-seq', '/1471000/DURPrdlstInfoService03/getOdsnAtentInfoList03', { itemSeq: '196000010', type: 'json', numOfRows: 2 }],
+  ['pill-all', '/1471000/MdcinGrnIdntfcInfoService03/getMdcinGrnIdntfcInfoList03', { type: 'json', numOfRows: 100 }],
+  ['pill-big', '/1471000/MdcinGrnIdntfcInfoService03/getMdcinGrnIdntfcInfoList03', { type: 'json', numOfRows: 1000 }],
+  ['pill-print', '/1471000/MdcinGrnIdntfcInfoService03/getMdcinGrnIdntfcInfoList03', { print_front: 'TYLENOL', type: 'json', numOfRows: 2 }],
+  ['pill-shape', '/1471000/MdcinGrnIdntfcInfoService03/getMdcinGrnIdntfcInfoList03', { drug_shape: '원형', color_class1: '분홍', type: 'json', numOfRows: 2 }],
+  ['pill-seq', '/1471000/MdcinGrnIdntfcInfoService03/getMdcinGrnIdntfcInfoList03', { item_seq: '202106092', type: 'json', numOfRows: 2 }],
 ];
 export default async function handler(req, res) {
   const out = {};
