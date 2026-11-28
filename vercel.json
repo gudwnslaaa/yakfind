@@ -36,6 +36,18 @@
   },
   "rewrites": [
     {
+      "source": "/holiday",
+      "destination": "/holiday.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/travel",
+      "destination": "/travel.html"
+    },
+    {
       "source": "/offline",
       "destination": "/offline.html"
     },
