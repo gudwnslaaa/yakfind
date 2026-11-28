@@ -129,7 +129,10 @@ $('#ocrFile').addEventListener('change',async e=>{const f=e.target.files[0];e.ta
   if(!toks.length){o.innerHTML='<p class="note">사진에서 약 이름을 찾지 못했어요. 약 이름 부분만 가까이 다시 찍거나 위에서 검색해 주세요.</p>';return}
   o.innerHTML='<p class="note">읽은 글자로 약을 찾는 중… ('+toks.length+'개 단어)</p>';
   const found=[];let i=0;
-  const work=async()=>{while(i<toks.length){const t=toks[i++];if(t.length<2)continue;try{const j=await (await fetch('/api/yak?action=drug&q='+encodeURIComponent(t))).json();
+  const work=async()=>{while(i<toks.length){const t=toks[i++];if(t.length<2)continue;try{
+    // 글자를 잘못 읽은 경우(캡슬·갭슐 등)를 생각해 짧게 줄여 다시 찾기
+    const tries=[...new Set([t,t.replace(/(캡|갭|겝|켑|시러|과리|연고|크림|정|산).*$/,''),t.slice(0,4),t.slice(0,3)])].filter(x=>x.length>=2);
+    let j={items:[]};for(const q of tries){j=await (await fetch('/api/yak?action=drug&q='+encodeURIComponent(q))).json();if((j.items||[]).length)break}
     const l=(j.items||[]).filter(x=>!/취소|취하/.test(x.CANCEL_NAME||'')&&!/수출용/.test(x.ITEM_NAME||'')&&String(x.ITEM_NAME).replace(/\s/g,'').startsWith(t.replace(/\s/g,'').slice(0,2)));
     if(l.length)found.push({t,l:l.slice(0,3)})}catch(er){}}};
   await Promise.all([work(),work(),work()]);
