@@ -3,4 +3,5 @@
   <sitemap><loc>https://yakfind.vercel.app/sitemaps/home.xml</loc></sitemap>
   <sitemap><loc>https://yakfind.vercel.app/sitemaps/drugs.xml</loc></sitemap>
   <sitemap><loc>https://yakfind.vercel.app/sitemaps/pharmacy.xml</loc></sitemap>
+  <sitemap><loc>https://yakfind.vercel.app/sitemaps/popular.xml</loc></sitemap>
 </sitemapindex>
