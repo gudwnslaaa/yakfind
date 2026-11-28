@@ -36,6 +36,14 @@
   },
   "rewrites": [
     {
+      "source": "/moonlight/:region",
+      "destination": "/api/clinic?mode=page&region=:region"
+    },
+    {
+      "source": "/fever",
+      "destination": "/fever.html"
+    },
+    {
       "source": "/holiday",
       "destination": "/holiday.html"
     },
