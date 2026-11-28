@@ -1,6 +1,7 @@
 // 회수 목록 공통 함수 (라우트 아님)
 import { callAll, clean, nz } from './_lib.js';
 
+const d8 = v => { v = String(v || '').replace(/\D/g, ''); return v.length === 8 ? `${v.slice(0, 4)}.${v.slice(4, 6)}.${v.slice(6)}` : ''; };
 export async function recallList() {
   const d = await callAll('recall', { type: 'json' }, 500, 4, 2);
   const seen = new Set();
