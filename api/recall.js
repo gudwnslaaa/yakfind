@@ -8,7 +8,7 @@ export async function recallList() {
   const seen = new Set();
   return d.items.map(x => ({
     seq: String(x.ITEM_SEQ || '').replace(/\D/g, ''), name: clean(x.PRDUCT), entp: clean(x.ENTRPS), reason: nz(x.RTRVL_RESN),
-    date: String(x.RECALL_COMMAND_DATE || '').replace(/\D/g, ''), lot: nz(x.MNFCTUR_NO), made: d8(x.MNFCTUR_DT), useBy: d8(x.USGPD),
+    date: String(x.RECALL_COMMAND_DATE || '').replace(/\D/g, ''), lot: [...new Set(nz(x.MNFCTUR_NO).split(/[,\s]+/).filter(Boolean))].join(', '), made: d8(x.MNFCTUR_DT), useBy: d8(x.USGPD),
   })).filter(r => { const k = r.seq + '|' + r.lot + '|' + r.date; if (seen.has(k)) return false; seen.add(k); return true; })
     .sort((a, b) => b.date.localeCompare(a.date));
 }

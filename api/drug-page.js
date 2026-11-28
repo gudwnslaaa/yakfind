@@ -36,7 +36,19 @@ export default async function handler(req, res) {
   let d, easy = null, same = [], dur = null, recalls = [];
   try {
     d = await findPermit(seq);
-    if (!d) return notFound(res, '이 품목코드의 약을 찾지 못했어요. 허가가 취소됐거나 주소가 잘못됐을 수 있어요.');
+    if (!d) {
+      // 마스크·거즈 같은 의약외품은 허가정보에 없어서, 회수 이력이 있으면 회수 안내만 보여줌
+      const base = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+      const rc = await fetch(`${base}/api/recall?seqs=${seq}`, { signal: AbortSignal.timeout(20000) }).then(r => r.json()).catch(() => null);
+      const list = rc && rc.ok ? rc.items : [];
+      if (!list.length) return notFound(res, '이 품목코드의 약을 찾지 못했어요. 허가가 취소됐거나 주소가 잘못됐을 수 있어요.');
+      const r0 = list[0];
+      const body = `<nav class="crumb"><a href="/recall">회수·판매중지 약</a> › ${esc(r0.name)}</nav>
+<h1>${esc(r0.name)}</h1><p class="sub">${esc(r0.entp)} · 의약외품 등 (의약품 허가정보에 없는 제품)</p>
+<div class="box" style="background:var(--redbg);border-left:6px solid var(--red)"><b>⚠ 회수·판매중지된 제품이에요</b><p class="note" style="margin:6px 0 0;color:var(--ink)">${list.map(r => `${esc(r.date.replace(/(\d{4})(\d{2})(\d{2})/, '$1.$2.$3'))} · ${esc(r.reason || '사유 비공개')}${r.lot ? ` · <b>제조번호 ${esc(r.lot)}</b>` : ''}${r.useBy ? ` · 사용기한 ${esc(r.useBy)}` : ''}`).join('<br>')}<br>갖고 있는 제품의 제조번호가 같을 때만 해당돼요. 같다면 쓰지 말고 산 곳에 문의하세요.</p></div>
+<p><a class="btn" href="/recall">회수 목록 전체 보기</a></p>`;
+      return sendHtml(res, 200, page({ title: `${r0.name} 회수·판매중지 정보 | 이 약, 어디 있지?`, desc: `${r0.name} 회수·판매중지 이유와 제조번호를 확인하세요.`, path: `/drug/${seq}`, body, noindex: true }), 21600);
+    }
     const ing = ingredients(d);
     const base = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
     const [e, s, du, rc] = await Promise.all([
