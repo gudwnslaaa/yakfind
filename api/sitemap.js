@@ -16,7 +16,7 @@ export default async function handler(req, res) {
       const seen = new Set();
       for (const x of d.items) { const s = String(x.ITEMSEQ || '').replace(/\D/g, ''); if (s && !seen.has(s)) { seen.add(s); urls.push(`${SITE}/drug/${s}`); } }
     } else if (type === 'pharmacy') {
-      urls.push(`${SITE}/pharmacy`, `${SITE}/moonlight`, `${SITE}/clinic`);
+      urls.push(`${SITE}/pharmacy`, `${SITE}/moonlight`, `${SITE}/clinic`, `${SITE}/scan`, `${SITE}/mybox`);
       const all = await Promise.all(SIDO.map(s => Promise.all(sidoNames(s).map(n => callAll('area', { Q0: n, ORD: 'NAME' }, 500, 30, 4).then(d => d.items).catch(() => []))).then(l => [s, l.flat()])));
       for (const [s, items] of all) {
         urls.push(`${SITE}/pharmacy/${encodeURIComponent(s)}`);

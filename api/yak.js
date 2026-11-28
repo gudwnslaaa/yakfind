@@ -15,6 +15,7 @@ const ROUTES = {
   symptom: '/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList',
   near: '/B552657/ErmctInsttInfoInqireService/getParmacyLcinfoInqire',
   area: '/B552657/ErmctInsttInfoInqireService/getParmacyListInfoInqire',
+  barcode: '/1471000/DrugPrdtPrmsnInfoService08/getDrugPrdtPrmsnDtlInq08',
 };
 
 function send(res, status, obj, cacheSec = 0) {
@@ -59,7 +60,7 @@ function parseJson(j) {
   let items = b.items ?? [];
   if (items && !Array.isArray(items) && items.item) items = items.item;
   if (items && !Array.isArray(items)) items = [items];
-  items = (items || []).filter(x => x && typeof x === 'object').map(x => {
+  items = (items || []).filter(x => x && typeof x === 'object').map(x => (x.item && typeof x.item === 'object' ? x.item : x)).map(x => {
     const r = {}; for (const [k, v] of Object.entries(x)) r[k.toUpperCase()] = v == null || typeof v === 'object' ? '' : String(v); return r;
   });
   return { gateway: '', code: String(h.resultCode ?? '00'), msg: h.resultMsg || '', total: Number(b.totalCount) || items.length, items };
@@ -86,6 +87,12 @@ export default async function handler(req, res) {
     const seq = arg(q, 'seq', 20).replace(/\D/g, '');
     if (!seq) return send(res, 400, { ok: false, error: '품목코드가 없습니다.' });
     Object.assign(p, { itemSeq: seq, numOfRows: 1, type: 'json' });
+  } else if (action === 'barcode') {
+    // 약 상자 바코드(880으로 시작하는 13자리) → 품목 하나
+    const code = arg(q, 'code', 20).replace(/\D/g, '');
+    if (!/^880\d{10}$/.test(code)) return send(res, 400, { ok: false, error: '국내 의약품 바코드(880으로 시작하는 13자리)가 아니에요.' });
+    Object.assign(p, { bar_code: code, numOfRows: 3, type: 'json' });
+    ttl = 604800;
   } else if (action === 'near') {
     const lat = parseFloat(arg(q, 'lat', 20)), lon = parseFloat(arg(q, 'lon', 20));
     if (!(lat >= 33 && lat <= 39 && lon >= 124 && lon <= 132)) return send(res, 400, { ok: false, error: '국내 위치가 아닙니다.' });
@@ -129,5 +136,12 @@ export default async function handler(req, res) {
   }
   if (d.gateway) return send(res, 502, { ok: false, error: keyHint(d.gateway) });
   if (d.code && d.code !== '00' && d.code !== '0') return send(res, 502, { ok: false, error: keyHint(d.msg || '오류 ' + d.code) });
+  if (action === 'barcode') { // 상세정보는 문서가 길어서 필요한 것만, 바코드가 정확히 맞는 것만
+    const code = p.bar_code;
+    const hit = d.items.filter(x => String(x.BAR_CODE || '').split(/[,\s]+/).includes(code));
+    const items = (hit.length ? hit : d.items.slice(0, d.total === 1 ? 1 : 0)).map(x => ({ ITEM_SEQ: x.ITEM_SEQ, ITEM_NAME: x.ITEM_NAME, ENTP_NAME: x.ENTP_NAME,
+      ETC_OTC_CODE: x.ETC_OTC_CODE, CHART: x.CHART, STORAGE_METHOD: x.STORAGE_METHOD, VALID_TERM: x.VALID_TERM, PACK_UNIT: x.PACK_UNIT, CANCEL_NAME: x.CANCEL_NAME }));
+    return send(res, 200, { ok: true, total: items.length, items }, items.length ? ttl : 3600);
+  }
   return send(res, 200, { ok: true, total: d.total, items: d.items }, ttl);
 }
