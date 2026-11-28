@@ -30,20 +30,14 @@
     "api/recall.js": {
       "maxDuration": 30
     },
-    "api/recall-page.js": {
-      "maxDuration": 30
-    },
     "api/clinic.js": {
-      "maxDuration": 30
-    },
-    "api/moonlight-page.js": {
       "maxDuration": 30
     }
   },
   "rewrites": [
     {
       "source": "/moonlight",
-      "destination": "/api/moonlight-page"
+      "destination": "/api/clinic?mode=page"
     },
     {
       "source": "/clinic",
@@ -51,7 +45,7 @@
     },
     {
       "source": "/recall",
-      "destination": "/api/recall-page"
+      "destination": "/api/recall?view=page"
     },
     {
       "source": "/er",
