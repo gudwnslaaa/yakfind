@@ -208,7 +208,7 @@ export function regionOf(addr) {
 }
 
 // ---- 페이지 틀 ----
-const CSS = `:root{color-scheme:light dark;--bg:light-dark(#ffffff,#15171a);--paper:light-dark(#f6f3ee,#1f2226);--ink:light-dark(#1b1d20,#eceae6);--mute:light-dark(#5f646b,#a3a7ad);--line:light-dark(#e3ded6,#33373c);--red:light-dark(#d1291f,#ff6a5e);--redbg:light-dark(#fdecea,#3a1f1d);--ok:light-dark(#1f6f45,#7fd3a3);--okbg:light-dark(#e6f4ec,#1d3327);--warnbg:light-dark(#fff1d6,#3a2e14);--warn:light-dark(#8a5a00,#f3c96b)}
+const CSS = `[hidden]{display:none!important}:root{color-scheme:light dark;--bg:light-dark(#ffffff,#15171a);--paper:light-dark(#f6f3ee,#1f2226);--ink:light-dark(#1b1d20,#eceae6);--mute:light-dark(#5f646b,#a3a7ad);--line:light-dark(#e3ded6,#33373c);--red:light-dark(#d1291f,#ff6a5e);--redbg:light-dark(#fdecea,#3a1f1d);--ok:light-dark(#1f6f45,#7fd3a3);--okbg:light-dark(#e6f4ec,#1d3327);--warnbg:light-dark(#fff1d6,#3a2e14);--warn:light-dark(#8a5a00,#f3c96b)}
 *{box-sizing:border-box;min-width:0}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip}
 h1,h2,h3{font-family:"Gothic A1","Noto Sans KR",sans-serif;line-height:1.2;text-wrap:balance;margin:0}a{color:inherit}
 .band{padding:clamp(18px,3vw,40px) max(5vw,16px)}.wrap{max-width:980px;margin:0 auto}
