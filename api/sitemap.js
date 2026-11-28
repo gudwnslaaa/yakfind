@@ -1,4 +1,6 @@
 // /sitemaps/drugs.xml, /sitemaps/pharmacy.xml → 검색엔진용 주소 목록
+import { babyList } from './_clinic.js';
+import { babyRegions } from './_moonlight.js';
 import { call, callAll, alive, SIDO, sidoNames, regionOf, getQuery, SITE, INGR_LIST, SYMPTOMS } from './_lib.js';
 
 const xml = urls => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u => `  <url><loc>${u.replace(/&/g, '&amp;')}</loc></url>`).join('\n')}\n</urlset>\n`;
@@ -31,7 +33,8 @@ export default async function handler(req, res) {
         }
       }
     } else if (type === 'pharmacy') {
-      urls.push(`${SITE}/pharmacy`, `${SITE}/moonlight`, `${SITE}/clinic`, `${SITE}/scan`, `${SITE}/mybox`, `${SITE}/holiday`, `${SITE}/travel`, `${SITE}/privacy`);
+      urls.push(`${SITE}/pharmacy`, `${SITE}/moonlight`, `${SITE}/clinic`, `${SITE}/scan`, `${SITE}/mybox`, `${SITE}/holiday`, `${SITE}/travel`, `${SITE}/privacy`, `${SITE}/fever`);
+      try { for (const r of babyRegions(await babyList()).values()) urls.push(`${SITE}/moonlight/${encodeURIComponent(r.slug)}`); } catch (e) { /* 달빛 목록을 못 받으면 건너뜀 */ }
       const all = await Promise.all(SIDO.map(s => Promise.all(sidoNames(s).map(n => callAll('area', { Q0: n, ORD: 'NAME' }, 500, 30, 4).then(d => d.items).catch(() => []))).then(l => [s, l.flat()])));
       for (const [s, items] of all) {
         urls.push(`${SITE}/pharmacy/${encodeURIComponent(s)}`);
