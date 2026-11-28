@@ -110,6 +110,14 @@ export default async function handler(req, res) {
   let d;
   try {
     d = await call(p);
+    // 2026.7 전남광주통합특별시 출범: 자료에 옛 이름(광주광역시·전라남도)이 섞여 있어 함께 조회
+    const MERGED = ['전남광주통합특별시', '광주광역시', '전라남도'];
+    if (action === 'area' && MERGED.includes(p.Q0) && !d.gateway) {
+      const more = await Promise.all(MERGED.filter(n => n !== p.Q0).map(n => call({ ...p, Q0: n }).catch(() => null)));
+      const seen = new Set(d.items.map(x => x.HPID));
+      for (const m of more) if (m && m.items) for (const x of m.items) if (!seen.has(x.HPID)) { seen.add(x.HPID); d.items.push(x); }
+      d.total = d.items.length;
+    }
     // 성분 검색은 결과가 많아서(아세트아미노펜 1천 건 이상) 최대 5쪽(500건)까지 이어서 받음
     if (action === 'ingr' && !d.gateway && d.total > d.items.length) {
       const pages = Math.min(5, Math.ceil(d.total / 100));

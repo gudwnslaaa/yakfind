@@ -28,7 +28,7 @@ ${x.note ? `<p class="note" style="margin:0 0 8px">${esc(x.note)}</p>` : ''}
 <p class="sub">밤이나 휴일에 아이가 아플 때 응급실 대신 갈 수 있는 소아 진료 병원 ${list.length}곳이에요. 평일 밤(오후 8시 이후) 진료 ${nNight}곳, 일요일 ${nSun}곳, 공휴일 ${nHol}곳이에요.</p>
 <div class="box" style="background:var(--redbg);border-left:6px solid var(--red)"><b>숨쉬기 힘들어하거나, 의식이 흐리거나, 경련이 멈추지 않으면 바로 119</b><p style="margin:8px 0 0"><a class="btn red" href="tel:119">119 전화</a> <a class="btn" href="/er">가까운 응급실</a></p></div>
 <p style="margin:16px 0"><button class="btn red" id="mgeo" type="button">내 위치에서 가까운 순으로 보기</button> <button class="btn" id="mopen" type="button">지금 진료 중인 곳만</button> <span class="note" id="mmsg"></span></p>
-<nav class="scroll" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">${order.map(s => `<a class="fchip" style="display:inline-flex;align-items:center;text-decoration:none" href="#s${order.indexOf(s)}">${esc(s)} ${groups.get(s).length}</a>`).join('')}</nav>
+<nav class="scroll" aria-label="지역으로 이동" style="display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;scrollbar-width:thin">${order.map(s => `<a class="fchip" style="display:inline-flex;align-items:center;text-decoration:none;flex:none" href="#s${order.indexOf(s)}">${esc(s)} ${groups.get(s).length}</a>`).join('')}</nav>
 <div id="mall">${order.map((s, i) => `<section id="s${i}"><h2>${esc(s)} <small class="note">${groups.get(s).length}곳</small></h2><ul class="list">${groups.get(s).map(card).join('')}</ul></section>`).join('')}</div>
 <ul class="list" id="mnear" hidden></ul>
 <p class="note" style="margin-top:20px">진료시간은 병원이 국립중앙의료원에 신고한 정보예요. 접수 마감이 진료 종료보다 이를 수 있으니 가기 전에 꼭 전화로 확인하세요. 자료: 국립중앙의료원 전국 병·의원 찾기 서비스.</p>
