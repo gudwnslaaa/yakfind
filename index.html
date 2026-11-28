@@ -40,7 +40,7 @@ a{color:inherit}
 .band{padding:clamp(20px,3.5vw,48px) max(5vw,16px)}
 .wrap{max-width:1180px;margin:0 auto}
 header.band{border-bottom:1px solid var(--line);padding-bottom:28px}
-.brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}.brand>a{flex:none}
 a.home{color:inherit;text-decoration:none;border-radius:12px}a.home:hover h1,h1 a.home:hover{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px;text-decoration-color:var(--red)}
 .sign{width:52px;height:52px;border-radius:12px;background:var(--red);color:#fff;display:grid;place-items:center;font:800 30px/1 "Gothic A1",sans-serif;flex:none}
 h1{font-size:clamp(28px,4.6vw,46px);font-weight:800}
@@ -65,7 +65,7 @@ h2 small{font:400 14px "Noto Sans KR";color:var(--mute)}
 .item.on{border:2px solid var(--red);padding:13px 15px}
 .item b{display:block;font-size:16px}
 .item span{color:var(--mute);font-size:14px}
-.tag{display:inline-block;font-size:13px;font-weight:600;border-radius:6px;padding:1px 8px;white-space:nowrap;flex:none}
+.tag{display:inline-block;font-size:14px;font-weight:600;border-radius:6px;padding:1px 8px;white-space:nowrap;flex:none}
 .tag.rx{background:var(--redbg);color:var(--red)}.tag.otc{background:var(--okbg);color:var(--ok)}
 .tag.open{background:var(--okbg);color:var(--ok)}.tag.soon{background:light-dark(#fff1d6,#3a2e14);color:light-dark(#8a5a00,#f3c96b)}.tag.closed{background:var(--paper);color:var(--mute)}
 .env{background:var(--paper);border-radius:18px;padding:clamp(18px,3vw,28px);margin-top:18px;border-top:6px solid var(--red)}
@@ -84,7 +84,7 @@ details p{margin:8px 0 0;white-space:pre-line;font-size:15px}
 .thumb.none::before,.thumb:empty::before{content:"";width:26px;height:12px;border-radius:6px;background:linear-gradient(90deg,var(--line) 50%,var(--mute) 50%);opacity:.6}
 .photo{margin:4px 0 14px;border-radius:14px;overflow:hidden;background:var(--bg);border:1px solid var(--line);cursor:zoom-in;padding:0;display:block;width:100%}
 .photo img{width:100%;aspect-ratio:780/426;object-fit:cover;display:block}
-.cap{font-size:13px;color:var(--mute);margin:-8px 0 14px}
+.cap{font-size:14px;color:var(--mute);margin:-8px 0 14px}
 dialog.lb{border:0;padding:0;background:transparent;max-width:min(92vw,900px)}
 dialog.lb::backdrop{background:rgba(0,0,0,.8)}
 dialog.lb img{width:100%;border-radius:12px;display:block;background:#fff}
@@ -112,9 +112,11 @@ dialog.lb p{color:#fff;text-align:center;margin:10px 0 0;font-size:15px}
 .mine span{color:var(--mute)}.mine a{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:4px 12px;text-decoration:none;color:var(--ink);min-height:34px}
 .star.on{background:var(--warnbg,#fff1d6);border-color:#e0b04a}
 .symnote{font-size:14px;color:var(--mute);margin:0 0 10px}
-.tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}
+.tgrp{margin-top:22px}.tgrp h2{font-size:17px;margin:0 0 10px;display:flex;gap:8px;align-items:baseline}.tgrp h2 small{font:400 14px/1.4 'Noto Sans KR',sans-serif;color:var(--mute)}
+.tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.tools.urgent a{background:var(--paper)}.tools.urgent a.er{border:2px solid var(--red)}
 .tools a{display:block;border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-decoration:none;color:var(--ink);background:var(--bg)}
-.tools a:hover{border-color:var(--red)}.tools b{display:block;font-size:15px}.tools span{font-size:13px;color:var(--mute)}
+.tools a:hover{border-color:var(--red)}.tools b{display:block;font-size:16px}.tools span{font-size:14px;color:var(--mute);line-height:1.4;display:block;margin-top:2px}.tools a{min-height:64px}
 @media(max-width:760px){.tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .popular a:hover{text-decoration-color:var(--red)}
 .filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
@@ -133,6 +135,9 @@ dialog.lb p{color:#fff;text-align:center;margin:10px 0 0;font-size:15px}
 @media(prefers-reduced-motion:reduce){.load::after{animation:none}}
 footer{border-top:1px solid var(--line);color:var(--mute);font-size:14px}
 footer p{margin:4px 0;max-width:80ch}
+@media(max-width:600px){.popular{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:4px;margin-right:-20px;padding-right:20px}.popular::-webkit-scrollbar{display:none}.popular>*{flex:none}.popular a,.popular .sym{border:1px solid var(--line);border-radius:999px;padding:6px 14px;text-decoration:none;min-height:40px;display:inline-flex;align-items:center}.popular span{font-weight:600;color:var(--ink)}}
+@media(max-width:900px){body:not(.searched) #sec-drug{display:none}}
+select.sel{height:44px;border:1px solid var(--line);border-radius:12px;padding:0 10px;font:inherit;font-size:16px;background:var(--bg);color:var(--ink);min-width:0}
 @media(max-width:600px){form.search{flex-direction:column}.search input{flex:none}.btn.main{width:100%}.area{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.area .btn{grid-column:1/-1}.pill{width:64px;height:64px}}
 </style>
 </head>
@@ -163,25 +168,30 @@ footer p{margin:4px 0;max-width:80ch}
       <button type="button" class="sym" data-s="두통">두통</button><button type="button" class="sym" data-s="발열">열</button><button type="button" class="sym" data-s="감기">감기</button><button type="button" class="sym" data-s="기침">기침</button><button type="button" class="sym" data-s="콧물">콧물</button><button type="button" class="sym" data-s="소화불량">소화불량</button><button type="button" class="sym" data-s="속쓰림">속쓰림</button><button type="button" class="sym" data-s="설사">설사</button><button type="button" class="sym" data-s="변비">변비</button><button type="button" class="sym" data-s="멀미">멀미</button><button type="button" class="sym" data-s="알레르기">알레르기</button><button type="button" class="sym" data-s="근육통">근육통</button><button type="button" class="sym" data-s="생리통">생리통</button><button type="button" class="sym" data-s="치통">치통</button><button type="button" class="sym" data-s="구내염">입병</button>
     </nav>
     <div id="mine"></div>
-    <nav class="tools" aria-label="도구">
-      <a href="/er" style="border-color:var(--red)"><b>가까운 응급실</b><span>실시간 남은 병상·직통 전화</span></a>
+    <div class="tgrp"><h2>지금 급해요 <small>밤·주말·휴일에도</small></h2>
+    <nav class="tools urgent" aria-label="급할 때">
+      <a class="er" href="/er"><b>가까운 응급실</b><span>실시간 남은 병상·직통 전화</span></a>
+      <a href="#h-ph" id="toPh"><b>문 연 약국</b><span>지금 영업 중인 가까운 약국</span></a>
       <a href="/moonlight"><b>달빛어린이병원</b><span>밤·휴일 아이 진료</span></a>
       <a href="/clinic"><b>문 연 병원</b><span>진료과별 지금 진료 중</span></a>
-      <a href="/check"><b>같이 먹어도 되나요?</b><span>약 2~5개 병용금기·중복 확인</span></a>
-      <a href="/pill"><b>이 알약 무슨 약?</b><span>글자·모양·색으로 찾기</span></a>
       <a href="/pharmacy"><b>일요일·공휴일 약국</b><span>우리 동네 요일별 영업시간</span></a>
       <a href="/convenience"><b>편의점 상비약</b><span>약국이 다 닫았을 때</span></a>
-      <a href="/ingredient"><b>성분별 약</b><span>같은 성분 든 약 전체</span></a>
+    </nav></div>
+    <div class="tgrp"><h2>약 알아보기</h2>
+    <nav class="tools" aria-label="약 알아보기">
+      <a href="/check"><b>같이 먹어도 되나요?</b><span>약 2~5개 함께 먹어도 되는지</span></a>
+      <a href="/pill"><b>이 알약 무슨 약?</b><span>글자·모양·색으로 찾기</span></a>
       <a href="/symptom"><b>증상별 약</b><span>두통·감기·소화불량 등</span></a>
-      <a href="/disposal"><b>남은 약 버리는 법</b><span>수거함·우체통·보관법</span></a>
+      <a href="/ingredient"><b>성분별 약</b><span>같은 성분 든 약 전체</span></a>
       <a href="/recall"><b>회수·판매중지 약</b><span>내 약이 회수 대상인지</span></a>
-    </nav>
+      <a href="/disposal"><b>남은 약 버리는 법</b><span>수거함·우체통·보관법</span></a>
+    </nav></div>
   </div>
 </header>
 
 <main class="band">
   <div class="wrap grid">
-    <section aria-labelledby="h-drug">
+    <section aria-labelledby="h-drug" id="sec-drug">
       <h2 id="h-drug">약 검색 결과 <small id="cnt"></small></h2>
       <div id="drugs" class="list"><div class="empty">찾는 약 이름을 위에 입력해 주세요.</div></div>
       <div id="detail"></div>
@@ -194,7 +204,7 @@ footer p{margin:4px 0;max-width:80ch}
         <button class="btn red" id="geo" type="button">내 위치로 주변 약국 찾기</button>
       </div>
       <form class="area" id="af">
-        <input id="sido" placeholder="시·도 (예: 서울특별시)" aria-label="시·도">
+        <select id="sido" class="sel" aria-label="시·도"><option value="">시·도 선택</option><option>서울특별시</option><option>부산광역시</option><option>대구광역시</option><option>인천광역시</option><option>전남광주통합특별시</option><option>대전광역시</option><option>울산광역시</option><option>세종특별자치시</option><option>경기도</option><option>강원특별자치도</option><option>충청북도</option><option>충청남도</option><option>전북특별자치도</option><option>경상북도</option><option>경상남도</option><option>제주특별자치도</option></select>
         <input id="gu" placeholder="시·군·구 (예: 마포구)" aria-label="시·군·구">
         <button class="btn" type="submit">지역으로 찾기</button>
       </form>
@@ -277,6 +287,7 @@ function toggleMine(d) {
   if (m.some(x => x.seq === d.ITEM_SEQ)) m = m.filter(x => x.seq !== d.ITEM_SEQ);
   else m.unshift({seq: d.ITEM_SEQ, name: shortName(nameOf(d))});
   store.set('yak_mine', m.slice(0, 20)); drawMine();
+$('#toPh').addEventListener('click', e => { e.preventDefault(); document.getElementById('h-ph').scrollIntoView({behavior: 'smooth', block: 'start'}); });
 }
 function drawMine() {
   const m = mine();
@@ -291,6 +302,7 @@ function drawMine() {
 /* ---------- 증상으로 찾기 ---------- */
 document.querySelectorAll('.sym').forEach(b => b.addEventListener('click', () => symptom(b.dataset.s, b.textContent)));
 async function symptom(key, label) {
+  document.body.classList.add('searched');
   document.querySelectorAll('.sym').forEach(b => b.classList.toggle('on', b.dataset.s === key));
   $('#detail').innerHTML = ''; current = null; drawScript();
   $('#h-drug').firstChild.textContent = `'${label}'에 쓰는 일반의약품 `;
@@ -315,6 +327,7 @@ $('#recent').addEventListener('click', e => { const b = e.target.closest('[data-
 /* ---------- 약 검색 ---------- */
 let drugResults = [];
 async function search(q) {
+  document.body.classList.add('searched');
   q = q.trim(); if (q.length < 2) return;
   $('#h-drug').firstChild.textContent = '약 검색 결과 '; document.querySelectorAll('.sym').forEach(b => b.classList.remove('on'));
   try { history.replaceState(null, '', '/?q=' + encodeURIComponent(q)); } catch (e) {}
@@ -542,7 +555,7 @@ document.querySelector('.popular').addEventListener('click', e => { const l = e.
 drawMine();
 { const s0 = new URLSearchParams(location.search).get('s'); const b0 = s0 && [...document.querySelectorAll('.sym')].find(b => b.dataset.s === s0); if (b0) symptom(s0, b0.textContent); }
 { const q0 = new URLSearchParams(location.search).get('q') || decodeURIComponent((location.hash || '').slice(1)); if (q0 && q0.trim().length >= 2) { $('#q').value = q0.trim(); search(q0.trim()); } }
-const a = store.get('yak_area', null); if (a) { $('#sido').value = a.sido || ''; $('#gu').value = a.gu || ''; }
+const a = store.get('yak_area', null); if (a) { const old = {'광주광역시':'전남광주통합특별시','전라남도':'전남광주통합특별시'}; $('#sido').value = old[a.sido] || a.sido || ''; $('#gu').value = a.gu || ''; }
 drawRecent();
 }
 </script>
