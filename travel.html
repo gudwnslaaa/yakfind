@@ -86,7 +86,8 @@ const TY=[['해열','진통','Pain reliever / Fever reducer (analgesic, antipyre
 const tyEn=t=>{for(const [a,b,e] of TY)if(t.includes(a)&&(!b||t.includes(b)||true))return e;return ''};
 const cap=s=>String(s||'').replace(/\b([a-z])/g,m=>m.toUpperCase());
 let sel=[];
-const drawSel=()=>{$('#tsel').innerHTML=sel.length?sel.map((x,i)=>'<span class="pk fchip" style="margin:2px">'+esc(x.name)+'<button type="button" data-rm="'+i+'" aria-label="빼기">×</button></span>').join(''):'없음';try{history.replaceState(null,'',sel.length?'/travel?seqs='+sel.map(x=>x.seq).join(','):'/travel')}catch(e){}make()};
+const chips=()=>{$('#tsel').innerHTML=sel.length?sel.map((x,i)=>'<span class="pk fchip" style="margin:2px">'+esc(x.name)+'<button type="button" data-rm="'+i+'" aria-label="빼기">×</button></span>').join(''):'없음'};
+const drawSel=()=>{chips();try{history.replaceState(null,'',sel.length?'/travel?seqs='+sel.map(x=>x.seq).join(','):'/travel')}catch(e){}make()};
 const add=(seq,name)=>{if(!seq||sel.some(x=>x.seq===seq)||sel.length>=8)return;sel.push({seq,name});drawSel()};
 $('#tsel').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(b){sel.splice(+b.dataset.rm,1);drawSel()}});
 $('#tf').addEventListener('submit',async e=>{e.preventDefault();const q=$('#tq').value.trim();if(q.length<2)return;$('#tres').innerHTML='<p class="note">찾는 중…</p>';
@@ -103,6 +104,7 @@ let tk=0;
 async function make(){const my=++tk;if(!sel.length){$('#card').innerHTML='';return}
   $('#card').innerHTML='<p class="note">카드를 만드는 중…</p>';
   try{const j=await (await fetch('/api/dur-check?en=1&seqs='+sel.map(x=>x.seq).join(','))).json();if(my!==tk)return;if(!j.ok)throw new Error(j.error);
+    j.drugs.forEach(d=>{const x=sel.find(v=>v.seq===d.seq);if(x&&d.ok&&d.name)x.name=d.name});chips();
     const rows=j.drugs.filter(d=>d.ok).map(d=>{const t=tyEn(d.type||'');return '<div class="row"><div class="ing">'+(d.ingr.length?d.ingr.map(x=>esc(cap(x.en))).join(' + '):'(ingredient unknown)')+'</div>'
       +(t?'<div class="ty">'+esc(t)+'</div>':'')+'<div class="ko">'+esc(d.name)+(d.en?' · '+esc(d.en):'')+' · '+(d.rx?'Prescription medicine (전문의약품)':'Over-the-counter (일반의약품)')+(d.ingr.some(x=>x.ko)?' · '+esc(d.ingr.map(x=>x.ko).filter(Boolean).join(', ')):'')+'</div></div>'}).join('');
     $('#card').innerHTML='<div class="mcard" id="mc"><p class="note" style="margin:0">Medicine information · 약 정보 (Korea)</p><h2>Active ingredients</h2>'+rows
