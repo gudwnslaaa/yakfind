@@ -1,5 +1,5 @@
 // /fever → 아이 해열제 교차복용 안내 (식약처·정책브리핑 공식 안내만 사용)
-import { page } from '../api/_lib.js';
+import { page } from '../lib/_lib.js';
 import fs from 'fs';
 const SRC = [
   ['식품의약품안전처 소아 해열제 안내 (뉴시스, 2025.12.26)', 'https://www.newsis.com/view/NISX20251226_0003455699'],

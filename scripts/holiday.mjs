@@ -1,4 +1,4 @@
-import { page, SIDO, esc } from '../api/_lib.js';
+import { page, SIDO, esc } from '../lib/_lib.js';
 import fs from 'fs';
 const body = `
 <nav class="crumb"><a href="/">약 검색</a> › 설 연휴 문 여는 약국·병원</nav>

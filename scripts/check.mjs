@@ -1,4 +1,4 @@
-import { page } from '../api/_lib.js';
+import { page } from '../lib/_lib.js';
 import fs from 'fs';
 const body = `
 <nav class="crumb"><a href="/">약 검색</a> › 같이 먹어도 되나요?</nav>

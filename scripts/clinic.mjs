@@ -1,5 +1,5 @@
-import { page, SIDO } from '../api/_lib.js';
-import { DEPTS } from '../api/_clinic.js';
+import { page, SIDO } from '../lib/_lib.js';
+import { DEPTS } from '../lib/_clinic.js';
 import fs from 'fs';
 const body = `
 <nav class="crumb"><a href="/">약 검색</a> › 문 연 병원</nav>

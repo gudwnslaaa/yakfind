@@ -1,4 +1,4 @@
-import { page } from '../api/_lib.js';
+import { page } from '../lib/_lib.js';
 import fs from 'fs';
 const body = `<h1>인터넷이 연결되지 않았어요</h1>
 <p class="sub">연결되면 다시 시도해 주세요. 지금 급하다면 바로 전화하세요.</p>

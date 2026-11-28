@@ -1,4 +1,4 @@
-import { page } from '../api/_lib.js';
+import { page } from '../lib/_lib.js';
 import fs from 'fs';
 const BOXJS = fs.readFileSync(new URL('./box.js', import.meta.url), 'utf8').replace(/^\/\/.*\n/, '');
 const body = `
