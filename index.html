@@ -146,7 +146,7 @@ footer p{margin:4px 0;max-width:80ch}
 @media(max-width:600px){.popular{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:4px;margin-right:-20px;padding-right:20px}.popular::-webkit-scrollbar{display:none}.popular>*{flex:none}.popular a,.popular .sym{border:1px solid var(--line);border-radius:999px;padding:6px 14px;text-decoration:none;min-height:40px;display:inline-flex;align-items:center}.popular span{font-weight:600;color:var(--ink)}}
 @media(max-width:900px){body:not(.searched) #sec-drug{display:none}}
 select.sel{height:44px;border:1px solid var(--line);border-radius:12px;padding:0 10px;font:inherit;font-size:16px;background:var(--bg);color:var(--ink);min-width:0}
-@media(max-width:600px){.search input{min-width:0;height:54px;font-size:17px}.btn.main{height:54px;padding:0 16px}.camlink{width:54px;height:54px}.area{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.area .btn{grid-column:1/-1}.pill{width:64px;height:64px}}
+@media(max-width:600px){.brand h1{font-size:25px;white-space:nowrap}.brand .sign{width:44px;height:44px;font-size:26px}.search input{min-width:0;height:54px;font-size:17px}.btn.main{height:54px;padding:0 16px}.camlink{width:54px;height:54px}.area{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.area .btn{grid-column:1/-1}.pill{width:64px;height:64px}}
 </style>
 <script>try{if(localStorage.getItem('yak_big')==='1')document.documentElement.classList.add('big')}catch(e){}</script>
 </head>
@@ -346,7 +346,7 @@ async function symptom(key, label) {
 
 function drawRecent() {
   const r = store.get('yak_recent', []).filter(t => !/^h-|^#/.test(t) && t.length >= 2).slice(0, 3);
-  $('#recent').innerHTML = r.map(t => `<button type="button" class="chip" data-q="${esc(t)}">${esc(t)}</button>`).join('');
+  $('#recent').innerHTML = (r.length ? '<span class="note" style="align-self:center;font-weight:600">최근 검색</span>' : '') + r.map(t => `<button type="button" class="chip" data-q="${esc(t)}">${esc(t)}</button>`).join('');
 }
 $('#recent').addEventListener('click', e => { const b = e.target.closest('[data-q]'); if (b) { $('#q').value = b.dataset.q; search(b.dataset.q); } });
 
