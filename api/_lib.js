@@ -12,6 +12,9 @@ export const ROUTES = {
   erList: '/B552657/ErmctInfoInqireService/getEgytListInfoInqire',
   erBed: '/B552657/ErmctInfoInqireService/getEmrrmRltmUsefulSckbdInfoInqire',
   recall: '/1471000/MdcinRtrvlSleStpgeInfoService05/getMdcinRtrvlSleStpgeItem05',
+  baby: '/B552657/HsptlAsembySearchService/getBabyListInfoInqire',
+  hospNear: '/B552657/HsptlAsembySearchService/getHsptlMdcncLcinfoInqire',
+  hospList: '/B552657/HsptlAsembySearchService/getHsptlMdcncListInfoInqire',
   durList: '/1471000/DURPrdlstInfoService03/getDurPrdlstInfoList03',
   dur_병용금기: '/1471000/DURPrdlstInfoService03/getUsjntTabooInfoList03',
   dur_특정연령대금기: '/1471000/DURPrdlstInfoService03/getSpcifyAgrdeTabooInfoList03',
@@ -191,7 +194,11 @@ export function dedupe(list) {
 }
 
 // ---- 지역 ----
-export const SIDO = ['서울특별시','부산광역시','대구광역시','인천광역시','광주광역시','대전광역시','울산광역시','세종특별자치시','경기도','강원특별자치도','충청북도','충청남도','전북특별자치도','전라남도','경상북도','경상남도','제주특별자치도'];
+// 2026.7.1 광주광역시+전라남도 → 전남광주통합특별시. 공공데이터에 옛 이름이 섞여 있어 세 이름을 모두 조회
+export const SIDO = ['서울특별시','부산광역시','대구광역시','인천광역시','전남광주통합특별시','대전광역시','울산광역시','세종특별자치시','경기도','강원특별자치도','충청북도','충청남도','전북특별자치도','경상북도','경상남도','제주특별자치도'];
+export const SIDO_ALIAS = { '전남광주통합특별시': ['전남광주통합특별시', '광주광역시', '전라남도'] };
+export const OLD_SIDO = { '광주광역시': '전남광주통합특별시', '전라남도': '전남광주통합특별시' };
+export const sidoNames = s => SIDO_ALIAS[s] || [s];
 // 주소 → { label: '용인시 수지구', q: '수지구', slug: '용인시-수지구' }  (세종처럼 시·군·구가 없으면 null)
 export function regionOf(addr) {
   const t = clean(addr).split(' ');
@@ -269,7 +276,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(
 <script>{const b=document.getElementById('shareBtn'),m=document.getElementById('shareMsg');b.addEventListener('click',async()=>{const d={title:document.title,url:location.href};try{if(navigator.share){await navigator.share(d);return}await navigator.clipboard.writeText(location.href);m.textContent='주소를 복사했어요. 카톡에 붙여넣어 보내세요.'}catch(e){if(e&&e.name==='AbortError')return;m.textContent=location.href}})}</script>
 </div></main>
 <footer class="band"><div class="wrap">
-  <p><a href="/">약 검색</a> · <a href="/er">가까운 응급실</a> · <a href="/check">같이 먹어도 되나요?</a> · <a href="/pill">모양으로 약 찾기</a> · <a href="/pharmacy">지역별 약국 영업시간</a> · <a href="/convenience">편의점 상비약</a> · <a href="/symptom">증상별 약</a> · <a href="/ingredient">성분별 약</a> · <a href="/disposal">남은 약 버리는 법</a> · <a href="/recall">회수·판매중지 약</a></p>
+  <p><a href="/">약 검색</a> · <a href="/er">가까운 응급실</a> · <a href="/moonlight">달빛어린이병원</a> · <a href="/clinic">문 연 병원</a> · <a href="/check">같이 먹어도 되나요?</a> · <a href="/pill">모양으로 약 찾기</a> · <a href="/pharmacy">지역별 약국 영업시간</a> · <a href="/convenience">편의점 상비약</a> · <a href="/symptom">증상별 약</a> · <a href="/ingredient">성분별 약</a> · <a href="/disposal">남은 약 버리는 법</a> · <a href="/recall">회수·판매중지 약</a></p>
   <p>약 정보: 식품의약품안전처 의약품 제품 허가정보·의약품개요정보(e약은요). 약국 정보: 국립중앙의료원 전국 약국 정보. 공공데이터포털(data.go.kr) 제공.</p>
   <p>영업시간은 약국이 신고한 정보라 실제와 다를 수 있어요. 방문 전에 꼭 전화로 확인하세요. 이 사이트는 정보 안내만 하며 약을 팔지 않습니다. 복용은 약사나 의사와 상담하세요.</p>
 </div></footer>

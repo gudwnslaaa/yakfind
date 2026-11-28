@@ -1,5 +1,5 @@
 // /api/er?lat=&lon=  또는  /api/er?sido=&gu=  → 가까운 응급실 + 실시간 남은 병상
-import { call, callAll, clean, realTel, SIDO, getQuery } from './_lib.js';
+import { call, callAll, clean, realTel, SIDO, sidoNames, getQuery } from './_lib.js';
 
 function send(res, status, obj, sec) {
   res.statusCode = status;
@@ -8,7 +8,7 @@ function send(res, status, obj, sec) {
   res.end(JSON.stringify(obj));
 }
 const num = v => { const n = parseInt(v, 10); return Number.isFinite(n) ? n : null; };
-const sidoOf = addr => { const t = clean(addr).split(' ')[0]; return SIDO.includes(t) ? t : ''; };
+const sidoOf = addr => clean(addr).split(' ')[0] || '';
 
 export default async function handler(req, res) {
   const q = getQuery(req);
@@ -23,8 +23,9 @@ export default async function handler(req, res) {
     } else {
       const sido = String(q.sido || '').trim(), gu = String(q.gu || '').trim();
       if (!SIDO.includes(sido)) return send(res, 400, { ok: false, error: '시·도를 정확히 골라 주세요.' });
-      const d = await callAll('erList', { Q0: sido, ...(gu ? { Q1: gu } : {}) }, 100, 3, 3);
-      hosp = d.items.map(x => ({ hpid: x.HPID, name: clean(x.DUTYNAME), addr: clean(x.DUTYADDR), tel: realTel(x.DUTYTEL1), dist: null, lat: +x.WGS84LAT, lon: +x.WGS84LON, kind: clean(x.DUTYEMCLSNAME), erTel: realTel(x.DUTYTEL3) }));
+      const items = [];
+      for (const n of sidoNames(sido)) { const d = await callAll('erList', { Q0: n, ...(gu ? { Q1: gu } : {}) }, 100, 3, 3).catch(() => ({ items: [] })); items.push(...d.items); }
+      hosp = items.map(x => ({ hpid: x.HPID, name: clean(x.DUTYNAME), addr: clean(x.DUTYADDR), tel: realTel(x.DUTYTEL1), dist: null, lat: +x.WGS84LAT, lon: +x.WGS84LON, kind: clean(x.DUTYEMCLSNAME), erTel: realTel(x.DUTYTEL3) }));
     }
     // 실시간 병상: 관련 시·도별로 한 번씩
     const sidos = [...new Set(hosp.map(h => sidoOf(h.addr)).filter(Boolean))];

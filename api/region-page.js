@@ -1,15 +1,19 @@
 // /pharmacy, /pharmacy/시도, /pharmacy/시도/시군구 → 지역별 약국 영업시간 페이지
-import { callAll, esc, clean, realTel, dedupe, DAYS, hoursOf, isLate, is24, SIDO, regionOf, page, sendHtml, notFound, failPage, getQuery } from './_lib.js';
+import { callAll, esc, clean, realTel, dedupe, DAYS, hoursOf, isLate, is24, SIDO, OLD_SIDO, sidoNames, regionOf, page, sendHtml, notFound, failPage, getQuery } from './_lib.js';
 
 const dec = v => { try { return decodeURIComponent(String(v || '')); } catch { return String(v || ''); } };
 const WEEK = 604800;
 
 async function fetchArea(sido, gu) {
-  const params = { Q0: sido, ORD: 'NAME' };
-  if (gu) params.Q1 = gu;
-  const d = await callAll('area', params, 500, gu ? 6 : 30, 6);
+  const all = [];
+  for (const name of sidoNames(sido)) {
+    const params = { Q0: name, ORD: 'NAME' };
+    if (gu) params.Q1 = gu;
+    const d = await callAll('area', params, 500, gu ? 6 : 30, 6);
+    all.push(...d.items);
+  }
   const seen = new Set();
-  return dedupe(d.items.filter(p => p.HPID ? !seen.has(p.HPID) && seen.add(p.HPID) : true));
+  return dedupe(all.filter(p => p.HPID ? !seen.has(p.HPID) && seen.add(p.HPID) : true));
 }
 
 function card(p) {
@@ -81,6 +85,9 @@ export default async function handler(req, res) {
     const body = `<h1>지역별 약국 영업시간</h1><p class="sub">시·도를 고르면 시·군·구별로 약국의 요일별 영업시간과 일요일·공휴일·심야 영업 여부를 볼 수 있어요.</p>
 <h2>시·도</h2><ul class="grid">${SIDO.map(s => `<li><a href="/pharmacy/${encodeURIComponent(s)}">${esc(s)}</a></li>`).join('')}</ul>`;
     return sendHtml(res, 200, page({ title: '지역별 약국 영업시간 — 일요일·공휴일·심야 약국 찾기 | 이 약, 어디 있지?', desc: '전국 시·군·구별 약국 영업시간을 요일별로 확인하세요. 일요일·공휴일·밤 늦게 여는 약국을 한눈에 볼 수 있어요.', path: '/pharmacy', body }), WEEK);
+  }
+  if (OLD_SIDO[sido]) { // 옛 이름 주소는 새 이름 주소로 옮김
+    res.statusCode = 301; res.setHeader('Location', '/pharmacy/' + encodeURIComponent(OLD_SIDO[sido]) + (slug ? '/' + encodeURIComponent(slug) : '')); res.setHeader('Cache-Control', 'public, s-maxage=604800'); return res.end();
   }
   if (!SIDO.includes(sido)) return notFound(res, `'${sido}'은(는) 시·도 이름이 아니에요.`);
 
