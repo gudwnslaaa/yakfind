@@ -33,17 +33,19 @@ ${taboo.length > 30 ? `<p class="note">외 ${taboo.length - 30}가지가 더 있
 export default async function handler(req, res) {
   const seq = String(getQuery(req).seq || '').replace(/\D/g, '').slice(0, 12);
   if (!seq) return notFound(res, '품목코드가 없어요.');
-  let d, easy = null, same = [], dur = null;
+  let d, easy = null, same = [], dur = null, recalls = [];
   try {
     d = await findPermit(seq);
     if (!d) return notFound(res, '이 품목코드의 약을 찾지 못했어요. 허가가 취소됐거나 주소가 잘못됐을 수 있어요.');
     const ing = ingredients(d);
-    const [e, s, du] = await Promise.all([
+    const base = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+    const [e, s, du, rc] = await Promise.all([
       isRx(d) ? null : call('easy', { itemSeq: seq, numOfRows: 1, type: 'json' }).catch(() => null),
       ing.length ? callAll('permit', { item_ingr_name: queryIngr(ing), type: 'json' }, 100, 5, 5).catch(() => null) : null,
       durFor(seq).catch(() => null),
+      fetch(`${base}/api/recall?seqs=${seq}`, { signal: AbortSignal.timeout(20000) }).then(r => r.json()).catch(() => null),
     ]);
-    dur = du;
+    dur = du; recalls = rc && rc.ok ? rc.items : [];
     easy = e && e.items[0] || null;
     if (s) {
       const key = ingrSet(d);
@@ -66,6 +68,7 @@ export default async function handler(req, res) {
   const body = `
 <nav class="crumb"><a href="/">약 검색</a> › ${esc(sname)}</nav>
 <h1>${esc(name)}</h1>
+${recalls.length ? `<div class="box" style="background:var(--redbg);border-left:6px solid var(--red)"><b>⚠ 이 약은 회수·판매중지 목록에 있어요</b><p class="note" style="margin:6px 0 0;color:var(--ink)">${recalls.slice(0, 5).map(r => `${esc(r.date.replace(/(\d{4})(\d{2})(\d{2})/, '$1.$2.$3'))} · ${esc(r.reason || '사유 비공개')}${r.lot ? ` · <b>제조번호 ${esc(r.lot)}</b>` : ''}`).join('<br>')}<br>갖고 있는 약의 포장에 적힌 제조번호가 같을 때만 해당돼요. 같다면 먹지 말고 산 약국에 문의하세요. <a href="/recall">회수 목록 전체 보기</a></p></div>` : ''}
 <p class="sub">${esc(clean(d.ENTP_NAME))} · <span class="tag ${rx ? 'rx' : 'otc'}">${rx ? '전문의약품' : '일반의약품'}</span>${d.PRDUCT_TYPE ? ' · ' + esc(clean(d.PRDUCT_TYPE).replace(/\[\d+\]/, '')) : ''}</p>
 ${img ? `<a class="photo" href="${esc(img)}" target="_blank" rel="noopener"><img src="${esc(img)}" alt="${esc(sname)} 낱알 사진"></a><p class="cap">식약처 제공 낱알 사진 · 포장이나 색은 실제와 다를 수 있어요</p>` : ''}
 
