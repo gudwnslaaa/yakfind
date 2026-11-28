@@ -2,26 +2,20 @@
 // /api/clinic?mode=near&lat=&lon=       → 내 주변 병·의원 (오늘 진료시간)
 // /api/clinic?mode=area&sido=&gu=&dept= → 지역·진료과별 병·의원 (요일별 진료시간)
 // 이 API는 하루 호출 한도가 1,000번이라 결과를 오래 저장합니다.
-import { call, callAll, clean, realTel, SIDO, sidoNames, getQuery } from './_lib.js';
+import { call, callAll, SIDO, sidoNames, getQuery } from './_lib.js';
+import { DEPTS, row, babyList } from './_clinic.js';
+import moonlightPage from './_moonlight.js';
+export { DEPTS };
 
-export const DEPTS = { D001: '내과', D002: '소아청소년과', D013: '이비인후과', D022: '가정의학과', D005: '피부과', D008: '정형외과', D012: '안과', D011: '산부인과', D014: '비뇨의학과' };
 function send(res, status, obj, sec) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', sec ? `public, s-maxage=${sec}, stale-while-revalidate=${sec * 4}` : 'no-store');
   res.end(JSON.stringify(obj));
 }
-const hours = x => Array.from({ length: 8 }, (_, i) => { const s = x[`DUTYTIME${i + 1}S`], c = x[`DUTYTIME${i + 1}C`]; return s && c ? `${s}-${c}` : ''; });
-const row = x => ({ hpid: x.HPID, name: clean(x.DUTYNAME), addr: clean(x.DUTYADDR), tel: realTel(x.DUTYTEL1), kind: clean(x.DUTYDIVNAM || x.DUTYDIVNAME),
-  lat: +(x.WGS84LAT || x.LATITUDE) || null, lon: +(x.WGS84LON || x.LONGITUDE) || null, h: hours(x), note: clean(x.DUTYETC || x.DUTYINF || '').slice(0, 120) });
-
-export async function babyList() {
-  const d = await callAll('baby', {}, 500, 2, 1);
-  return d.items.map(row);
-}
-
 export default async function handler(req, res) {
   const q = getQuery(req); const mode = String(q.mode || '');
+  if (mode === 'page') return moonlightPage(req, res);
   try {
     if (mode === 'baby') return send(res, 200, { ok: true, items: await babyList() }, 86400);
     if (mode === 'near') {
