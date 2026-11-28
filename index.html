@@ -176,9 +176,6 @@ select.sel{height:44px;border:1px solid var(--line);border-radius:12px;padding:0
       <a href="/?q=%EB%B6%80%EB%A3%A8%ED%8E%9C" data-q="부루펜">부루펜</a>
       <a href="/?q=%EC%BD%94%EB%A6%AC%EA%B8%B0%EB%8B%A4" data-q="코리기다">코리기다</a>
     </nav>
-    <nav class="popular" aria-label="증상으로 찾기"><span>증상으로 찾기</span>
-      <button type="button" class="sym" data-s="두통">두통</button><button type="button" class="sym" data-s="발열">열</button><button type="button" class="sym" data-s="감기">감기</button><button type="button" class="sym" data-s="기침">기침</button><button type="button" class="sym" data-s="콧물">콧물</button><button type="button" class="sym" data-s="소화불량">소화불량</button><button type="button" class="sym" data-s="속쓰림">속쓰림</button><button type="button" class="sym" data-s="설사">설사</button><button type="button" class="sym" data-s="변비">변비</button><button type="button" class="sym" data-s="멀미">멀미</button><button type="button" class="sym" data-s="알레르기">알레르기</button><button type="button" class="sym" data-s="근육통">근육통</button><button type="button" class="sym" data-s="생리통">생리통</button><button type="button" class="sym" data-s="치통">치통</button><button type="button" class="sym" data-s="구내염">입병</button>
-    </nav>
     <div id="mine"></div>
     <p class="hol" id="holBanner" hidden style="margin-top:16px"><b>설 연휴(2월 6일~9일)</b>에 문 여는 약국·병원 미리 확인하기 → <a href="/holiday">설 연휴 안내 보기</a></p>
     <script>{const n=new Date();if(n>=new Date('2027-01-05')&&n<new Date('2027-02-10T00:00:00+09:00'))document.getElementById('holBanner').hidden=false}</script>
@@ -579,7 +576,7 @@ $('#af').addEventListener('submit', async e => {
 
 document.querySelector('.popular').addEventListener('click', e => { const l = e.target.closest('[data-q]'); if (!l) return; e.preventDefault(); $('#q').value = l.dataset.q; search(l.dataset.q); });
 drawMine();
-{ const s0 = new URLSearchParams(location.search).get('s'); const b0 = s0 && [...document.querySelectorAll('.sym')].find(b => b.dataset.s === s0); if (b0) symptom(s0, b0.textContent); }
+{ const s0 = new URLSearchParams(location.search).get('s'); if (s0 && s0.length >= 2) symptom(s0, s0); }
 { const hs = decodeURIComponent((location.hash || '').slice(1)); const q0 = new URLSearchParams(location.search).get('q') || (hs && !document.getElementById(hs) ? hs : ''); if (q0 && q0.trim().length >= 2) { $('#q').value = q0.trim(); search(q0.trim()); } }
 const a = store.get('yak_area', null); if (a) { const old = {'광주광역시':'전남광주통합특별시','전라남도':'전남광주통합특별시'}; $('#sido').value = old[a.sido] || a.sido || ''; $('#gu').value = a.gu || ''; }
 drawRecent();
