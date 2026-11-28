@@ -14,9 +14,9 @@ export default async function handler(req, res) {
       let j = null; try { j = JSON.parse(t); } catch {}
       if (!j) { out[k] = { http: r.status, text: t.slice(0, 300) }; return; }
       const b = (j.body || (j.response && j.response.body)) || {};
-      let items = b.items; if (items && items.item) items = items.item; if (items && !Array.isArray(items)) items = [items];
+      let items = b.items; if (items && items.item) items = items.item; if (items && !Array.isArray(items)) items = [items]; items = (items || []).map(x => x && x.item && typeof x.item === 'object' ? x.item : x);
       out[k] = { http: r.status, header: j.header || (j.response && j.response.header), total: b.totalCount, n: (items || []).length,
-        last: (items || []).slice(-1).map(x => Object.fromEntries(Object.entries(x).map(([a, v]) => [a, String(v).slice(0, 70)]))), rows: (items || []).slice(0, 3).map(x => Object.fromEntries(Object.entries(x).map(([a, v]) => [a, String(v).slice(0, 70)]))) };
+        last: (items || []).slice(-1).map(x => Object.fromEntries(Object.entries(x).map(([a, v]) => [a, String(v).slice(0, 120)]))), rows: (items || []).slice(0, 3).map(x => Object.fromEntries(Object.entries(x).map(([a, v]) => [a, String(v).slice(0, 120)]))) };
     } catch (e) { out[k] = { error: String(e) }; }
   }));
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
