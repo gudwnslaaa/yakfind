@@ -27,7 +27,7 @@ function card(p) {
   <div class="hd"><h3>${esc(name)}</h3><span class="badges"><span class="tag now closed" hidden></span>${all24 ? '<span class="tag late">24시간</span>' : late ? '<span class="tag late">밤 10시 이후</span>' : ''}${sun ? '<span class="tag otc">일요일 영업</span>' : ''}${hol ? '<span class="tag otc">공휴일 영업</span>' : ''}</span></div>
   <div class="addr">${esc(addr)}</div>
   <div class="hrs">${DAYS.map((d, i) => `<div class="${h[i] ? '' : 'off'}" data-d="${i}"><b>${d}</b>${h[i] ? esc(h[i].text).replace('~', '~<wbr>') : '휴무'}</div>`).join('')}</div>
-  <div class="acts">${tel ? `<a class="btn red" href="tel:${esc(tel.replace(/[^\d]/g, ''))}">전화 ${esc(tel)}</a>` : ''}<a class="btn" href="${esc(map)}" target="_blank" rel="noopener">지도 보기</a></div>
+  <div class="acts">${tel ? `<a class="btn red" href="tel:${esc(tel.replace(/[^\d]/g, ''))}">전화 ${esc(tel)}</a>` : ''}<a class="btn" href="${esc(map)}" target="_blank" rel="noopener">지도 보기</a><button class="rep" type="button" data-report="${esc(name + ' (' + addr + ')')}">정보가 틀려요</button></div>
 </li>`;
 }
 

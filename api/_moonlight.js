@@ -20,7 +20,7 @@ export default async function handler(req, res) {
 <div class="addr">${esc(x.addr)} <span class="dist"></span></div>
 <div class="hrs">${DAYS.map((d, i) => `<div class="${x.h[i] ? '' : 'off'}" data-d="${i}"><b>${d}</b>${x.h[i] ? txt(x.h[i]) : '휴진'}</div>`).join('')}</div>
 ${x.note ? `<p class="note" style="margin:0 0 8px">${esc(x.note)}</p>` : ''}
-<div class="acts">${x.tel ? `<a class="btn red" href="tel:${esc(x.tel.replace(/[^\d]/g, ''))}">전화 ${esc(x.tel)}</a>` : ''}<a class="btn" href="${esc(map)}" target="_blank" rel="noopener">지도 보기</a></div></li>`;
+<div class="acts">${x.tel ? `<a class="btn red" href="tel:${esc(x.tel.replace(/[^\d]/g, ''))}">전화 ${esc(x.tel)}</a>` : ''}<a class="btn" href="${esc(map)}" target="_blank" rel="noopener">지도 보기</a><button class="rep" type="button" data-report="${esc(x.name + ' (' + x.addr + ')')}">정보가 틀려요</button></div></li>`;
     };
     const body = `
 <nav class="crumb"><a href="/">약 검색</a> › 달빛어린이병원</nav>
