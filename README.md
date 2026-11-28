@@ -12,11 +12,30 @@ GitHub에 푸시하면 Vercel이 자동으로 다시 배포합니다.
 - SEO: 메타 태그, 공유 썸네일(og.png), robots.txt, sitemap.xml
 - 방문자 통계: Vercel Web Analytics
 
-## 파일 구성
-- `index.html` — 화면
-- `api/yak.js` — 공공데이터포털 중계 함수 (Vercel이 서버에서 실행, 인증키를 숨김)
-- `vercel.json` — 함수를 서울 리전(icn1)에서 실행하도록 설정 (공공 API 응답 속도와 해외 접속 문제 대비)
-- `package.json` — 함수 실행 설정 (설치할 패키지 없음)
+## 파일 구성 (2026-11 기준)
+**화면**
+- `index.html` — 메인 화면 (손으로 관리. 약 검색·문 연 약국·메뉴)
+- `*.html` (check, pill, scan, mybox, travel, holiday, privacy, er, clinic, convenience, disposal, offline) — **`scripts/`가 만들어 내는 파일. 직접 고치지 말고 `scripts/<이름>.mjs`를 고친 뒤 `node scripts/build.mjs` 실행**
+- `manifest.webmanifest`, `sw.js`, `icon-*.png`, `apple-touch-icon.png` — 홈 화면 설치(PWA)
+
+**서버 함수 (`api/`, Vercel 무료 요금제는 함수 12개까지 → `_`로 시작하는 파일은 함수가 아닌 공용 모듈)**
+- `_lib.js` — 공용: 공공데이터 호출, 성분 정리, 영업시간 계산, 시·도 목록, **모든 페이지 틀 `page()`** (머리말·바닥글·하단 빠른 메뉴·신고 버튼)
+- `yak.js` — 약 검색·성분·e약은요·주변/지역 약국·바코드
+- `drug-page.js` (/drug/품목코드), `region-page.js` (/pharmacy/...), `topic-page.js` (/ingredient, /symptom)
+- `dur-check.js` — 병용금기·중복 확인, `?en=1`은 영문 약 카드 정보
+- `pill-index.js`, `pill.js` — 낱알식별(알약 찾기)
+- `er.js` — 응급실 실시간 병상
+- `clinic.js` (+ `_clinic.js`, `_moonlight.js`) — 병·의원, 달빛어린이병원(/moonlight)
+- `recall.js` (+ `_recall.js`, `_recall-page.js`) — 회수·판매중지(/recall)
+- `sitemap.js` — /sitemaps/*.xml
+
+**기타**
+- `scripts/` — 정적 페이지 생성기 (배포에는 안 올라감, `.vercelignore`)
+- `vercel.json` — 주소 연결(rewrites), 함수 시간, 서울 리전
+
+**해마다 할 일**
+- 공휴일 목록: `index.html`의 HOLIDAYS, `scripts/clinic.mjs`·`api/_moonlight.js`의 HOL (현재 2027년 12월까지)
+- `scripts/holiday.mjs` — 다음 명절(추석 등)에 맞게 날짜·문구 바꾸기
 
 ## 1. GitHub에 올리기
 1. GitHub에서 새 저장소를 만듭니다 (예: `yakfind`). 공개·비공개 둘 다 됩니다.
