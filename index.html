@@ -17,6 +17,7 @@
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#d1291f">
+<link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="약 찾기">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23d1291f'/%3E%3Ctext x='32' y='45' font-size='38' font-weight='800' text-anchor='middle' fill='white' font-family='sans-serif'%3E%EC%95%BD%3C/text%3E%3C/svg%3E">
 <script defer src="/_vercel/insights/script.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,6 +113,7 @@ dialog.lb p{color:#fff;text-align:center;margin:10px 0 0;font-size:15px}
 .mine span{color:var(--mute)}.mine a{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:4px 12px;text-decoration:none;color:var(--ink);min-height:34px}
 .star.on{background:var(--warnbg,#fff1d6);border-color:#e0b04a}
 .symnote{font-size:14px;color:var(--mute);margin:0 0 10px}
+.scanrow{margin:12px 0 0}.scanrow .btn{display:inline-flex;align-items:center;text-decoration:none}@media(max-width:600px){.scanrow .btn{width:100%;justify-content:center;height:48px}}
 .tgrp{margin-top:22px}.tgrp h2{font-size:17px;margin:0 0 10px;display:flex;gap:8px;align-items:baseline}.tgrp h2 small{font:400 14px/1.4 'Noto Sans KR',sans-serif;color:var(--mute)}
 .tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .tools.urgent a{background:var(--paper)}.tools.urgent a.er{border:2px solid var(--red)}
@@ -153,6 +155,7 @@ select.sel{height:44px;border:1px solid var(--line);border-radius:12px;padding:0
       <input id="q" name="q" type="search" placeholder="예: 타이레놀, 게보린, 판콜" autocomplete="off" enterkeyhint="search" required minlength="2">
       <button class="btn main" type="submit">찾기</button>
     </form>
+    <p class="scanrow"><a class="btn red" href="/scan">📷 약 상자 바코드 찍어서 찾기</a></p>
     <div class="recent" id="recent"></div>
     <nav class="popular" aria-label="자주 찾는 약"><span>자주 찾는 약</span>
       <a href="/?q=%ED%83%80%EC%9D%B4%EB%A0%88%EB%86%80" data-q="타이레놀">타이레놀</a>
@@ -179,6 +182,8 @@ select.sel{height:44px;border:1px solid var(--line);border-radius:12px;padding:0
     </nav></div>
     <div class="tgrp"><h2>약 알아보기</h2>
     <nav class="tools" aria-label="약 알아보기">
+      <a href="/mybox"><b>우리 집 약 상자</b><span>가족별 약·사용기한 알림</span></a>
+      <a href="/scan"><b>바코드로 약 찾기</b><span>상자 찍으면 회수 여부까지</span></a>
       <a href="/check"><b>같이 먹어도 되나요?</b><span>약 2~5개 함께 먹어도 되는지</span></a>
       <a href="/pill"><b>이 알약 무슨 약?</b><span>글자·모양·색으로 찾기</span></a>
       <a href="/symptom"><b>증상별 약</b><span>두통·감기·소화불량 등</span></a>
@@ -223,6 +228,12 @@ select.sel{height:44px;border:1px solid var(--line);border-radius:12px;padding:0
 <dialog class="lb" id="lb"><img id="lbImg" alt=""><p id="lbCap"></p></dialog>
 <footer class="band">
   <div class="wrap">
+<p id="instRow" hidden style="margin:0 0 10px"><button class="btn red" type="button" id="instBtn">📲 홈 화면에 앱처럼 추가</button></p><p id="instIos" class="note" hidden style="margin:0 0 10px">아이폰: 아래 <b>공유 버튼(□↑)</b>을 누르고 <b>‘홈 화면에 추가’</b>를 고르세요.</p>
+<script>{let ev=null;const row=document.getElementById('instRow'),btn=document.getElementById('instBtn'),ios=document.getElementById('instIos');const sa=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();ev=e;row.hidden=false});
+if(!sa&&/iphone|ipad|ipod/i.test(navigator.userAgent)){row.hidden=false;btn.onclick=()=>{ios.hidden=!ios.hidden}}
+else btn.onclick=async()=>{if(!ev)return;ev.prompt();await ev.userChoice.catch(()=>{});ev=null;row.hidden=true};}</script>
     <p><a href="/pharmacy">지역별 약국 영업시간 (일요일·공휴일·심야)</a></p>
     <p>약 정보: 식품의약품안전처 의약품 제품 허가정보·의약품개요정보(e약은요). 약국 정보: 국립중앙의료원 전국 약국 정보. 공공데이터포털(data.go.kr) 제공.</p>
     <p>약국 재고는 공개된 정보가 없어서 보여드리지 않아요. 영업시간은 등록된 정보 기준이라 공휴일이나 임시 휴무와 다를 수 있으니 전화로 확인해 주세요.</p>
@@ -285,14 +296,16 @@ const isMine = seq => mine().some(x => x.seq === seq);
 function toggleMine(d) {
   let m = mine();
   if (m.some(x => x.seq === d.ITEM_SEQ)) m = m.filter(x => x.seq !== d.ITEM_SEQ);
-  else m.unshift({seq: d.ITEM_SEQ, name: shortName(nameOf(d))});
-  store.set('yak_mine', m.slice(0, 20)); drawMine();
+  else m.unshift({seq: d.ITEM_SEQ, name: shortName(nameOf(d)), who: '나', at: Date.now()});
+  store.set('yak_mine', m.slice(0, 80)); drawMine();
 $('#toPh').addEventListener('click', e => { e.preventDefault(); document.getElementById('h-ph').scrollIntoView({behavior: 'smooth', block: 'start'}); });
 }
 function drawMine() {
   const m = mine();
-  $('#mine').innerHTML = m.length ? `<div class="mine"><span>★ 내 약</span>${m.map(x => `<a href="/drug/${esc(x.seq)}">${esc(x.name)}</a>`).join('')}</div><div id="mineRecall"></div>` : '';
-  if (m.length) fetch('/api/recall?seqs=' + m.map(x => x.seq).join(',')).then(r => r.json()).then(j => {
+  const seen = new Set(), u = m.filter(x => !seen.has(x.seq) && seen.add(x.seq));
+  const old = m.filter(x => { if (!x.exp) return false; const d = new Date(x.exp + 'T00:00:00'); return d < new Date(new Date().toDateString()); }).length;
+  $('#mine').innerHTML = m.length ? `<div class="mine"><span>★ 우리 집 약</span>${u.slice(0, 6).map(x => `<a href="/drug/${esc(x.seq)}">${esc(x.name)}</a>`).join('')}<a href="/mybox"><b>약 상자 열기${m.length > 6 ? ` (${m.length}개)` : ''} →</b></a></div>${old ? `<p class="hol" style="background:var(--redbg)">사용기한이 지난 약이 ${old}개 있어요. <a href="/mybox">약 상자에서 확인 →</a></p>` : ''}<div id="mineRecall"></div>` : '';
+  if (m.length) fetch('/api/recall?seqs=' + u.map(x => x.seq).join(',')).then(r => r.json()).then(j => {
     if (!j.ok || !j.items.length || !$('#mineRecall')) return;
     const names = [...new Set(j.items.map(r => r.name))];
     $('#mineRecall').innerHTML = `<p class="hol" style="background:var(--redbg)">⚠ 내 약 중 <b>${esc(names.join(', '))}</b>이(가) 회수·판매중지 목록에 있어요. 제조번호가 같은지 <a href="/recall">회수 목록</a>에서 확인하세요.</p>`;

@@ -1,0 +1,21 @@
+{
+  "name": "이 약, 어디 있지?",
+  "short_name": "약 찾기",
+  "description": "같은 성분 약, 문 연 약국·병원·응급실, 약 바코드 확인, 우리 집 약 상자",
+  "lang": "ko",
+  "start_url": "/?src=app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#15171a",
+  "theme_color": "#d1291f",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "가까운 응급실", "url": "/er", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "바코드로 약 찾기", "url": "/scan", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "우리 집 약 상자", "url": "/mybox", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

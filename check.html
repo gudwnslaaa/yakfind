@@ -9,6 +9,7 @@
 <meta property="og:title" content="같이 먹어도 되나요? 약 병용금기·성분 중복 확인 | 이 약, 어디 있지?"><meta property="og:description" content="먹는 약 2~5개를 고르면 식약처 DUR 정보로 함께 먹으면 안 되는 조합, 같은 성분 중복, 같은 종류 약 중복을 무료로 확인해 드려요.">
 <meta property="og:url" content="https://yakfind.vercel.app/check"><meta property="og:image" content="https://yakfind.vercel.app/og.png">
 <meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#d1291f">
+<link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="약 찾기">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23d1291f'/%3E%3Ctext x='32' y='45' font-size='38' font-weight='800' text-anchor='middle' fill='white' font-family='sans-serif'%3E%EC%95%BD%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@600;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
@@ -65,6 +66,10 @@ footer{border-top:1px solid var(--line);color:var(--mute);font-size:14px;margin-
   <form id="cf" class="s" style="max-width:none" role="search"><input id="cq" type="search" placeholder="약 이름 (예: 타이레놀, 판콜)" aria-label="약 이름" minlength="2" required><button class="btn ink" type="submit">찾기</button></form>
   <div id="cres" class="list" style="margin-top:10px"></div>
   <p id="mineRow" class="note" style="margin:10px 0 0"></p>
+  <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px"><b>📷 약봉투·처방전 사진으로 넣기</b>
+    <p class="note" style="margin:4px 0 10px">약 이름이 적힌 부분을 밝게, 반듯하게 찍어 주세요. 글자는 <b>휴대폰 안에서</b> 읽고 사진은 어디에도 보내지 않아요. 처음 한 번은 글자 인식 도구를 받느라 30초쯤 걸릴 수 있어요.</p>
+    <label class="btn" style="display:inline-flex;align-items:center;cursor:pointer">사진 찍기·고르기<input id="ocrFile" type="file" accept="image/*" capture="environment" hidden></label>
+    <div id="ocrOut" aria-live="polite"></div></div>
 </div>
 <h2>고른 약 <small class="note" id="ccount">0개</small></h2>
 <ul id="picked" class="list"><li class="note">아직 고른 약이 없어요. 위에서 검색해서 추가하세요.</li></ul>
@@ -106,12 +111,44 @@ $('#go').addEventListener('click',async()=>{ $('#out').innerHTML='<p class="note
   }catch(er){$('#out').innerHTML='<p class="note">'+esc(er.message||'오류가 났어요.')+'</p>'}});
 const s0=new URLSearchParams(location.search).get('seqs');
 if(s0){picked=s0.split(',').filter(Boolean).slice(0,5).map(seq=>({seq,name:'품목 '+seq}));draw();if(picked.length>=2)$('#go').click()}
+
+const STOP=new Set('조제일 투약량 투약일 처방일 약품명 복용 복약 식후 식전 식간 아침 점심 저녁 취침 하루 매일 약국 약사 환자 처방 조제 투약 성명 병원 의원 주의 보관 냉장 실온 안내 효능 효과 용법 용량 영수증 금액 본인부담 합계 전화 주소 일수 개수 횟수 총량 투여 내복 외용 진료 발행 교부 보험 의료 기관 번호 날짜 분량 시간 이전 이후 정도 경우 사항 다음 함께 드세요 마세요 하세요 복용법 약품명 약품 사진 모양 색깔 처방전 조제약 의약품 일반 전문 진통제 소화제 항생제 해열제 감기약 위장약 소염제 근이완제 기관지 가래 기침 콧물 두통 발열 해열 진통 소화'.split(' '));
+const base=t=>t.replace(/[0-9.]+\s*(mg|㎎|밀리그램|mcg|g|ml|mL|㎖|그램|정|캡슐)?$/i,'').replace(/(필름코팅정|서방정|연질캡슐|경질캡슐|장용정|캡슐|시럽|과립|현탁액|정|액|산)$/,'');
+let tessP=null;
+const loadTess=()=>tessP||(tessP=new Promise((ok,no)=>{if(window.Tesseract)return ok(window.Tesseract);const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';sc.onload=()=>ok(window.Tesseract);sc.onerror=()=>{tessP=null;no(new Error('load'))};document.head.appendChild(sc)}));
+const shrink=f=>new Promise((ok,no)=>{const im=new Image();im.onload=()=>{const k=Math.min(1,2000/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;const g=c.getContext('2d');g.filter='grayscale(1) contrast(1.4)';g.drawImage(im,0,0,c.width,c.height);ok(c)};im.onerror=no;im.src=URL.createObjectURL(f)});
+$('#ocrFile').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const o=$('#ocrOut');
+  o.innerHTML='<p class="note">글자 인식 도구를 준비하는 중…</p>';
+  let text='';
+  try{const T=await loadTess();const cv=await shrink(f);const w=await T.createWorker('kor',1,{logger:m=>{if(m.status==='recognizing text')o.innerHTML='<p class="note">사진 속 글자를 읽는 중… '+Math.round(m.progress*100)+'%</p>'}});
+    const r=await w.recognize(cv);text=r.data.text||'';await w.terminate();
+  }catch(er){o.innerHTML='<p class="note">글자를 읽지 못했어요. 인터넷 연결을 확인하거나 위에서 약 이름으로 검색해 주세요.</p>';return}
+  // 환자 이름 같은 개인정보는 검색어로 보내지 않음
+  const names=new Set((text.match(/(?:환자|성명|이름|수진자|환자명)\s*[:：]?\s*([가-힣]{2,4})/g)||[]).map(m=>m.replace(/^(환자명|환자|성명|이름|수진자)\s*[:：]?\s*/,'')));
+  const toks=[...new Set((text.match(/[가-힣A-Za-z][가-힣A-Za-z0-9.]{1,30}/g)||[]).map(t=>t.trim()).filter(t=>(t.match(/[가-힣]/g)||[]).length>=2).map(base).filter(t=>t.length>=2&&!STOP.has(t)&&!names.has(t)&&!/^(오전|오후|월|일|회)/.test(t)&&!/(약국|병원|의원|약방|센터|하세요|세요|니다|십시오)$/.test(t)))].slice(0,14);
+  if(!toks.length){o.innerHTML='<p class="note">사진에서 약 이름을 찾지 못했어요. 약 이름 부분만 가까이 다시 찍거나 위에서 검색해 주세요.</p>';return}
+  o.innerHTML='<p class="note">읽은 글자로 약을 찾는 중… ('+toks.length+'개 단어)</p>';
+  const found=[];let i=0;
+  const work=async()=>{while(i<toks.length){const t=toks[i++];if(t.length<2)continue;try{const j=await (await fetch('/api/yak?action=drug&q='+encodeURIComponent(t))).json();
+    const l=(j.items||[]).filter(x=>!/취소|취하/.test(x.CANCEL_NAME||'')&&!/수출용/.test(x.ITEM_NAME||'')&&String(x.ITEM_NAME).replace(/\s/g,'').startsWith(t.replace(/\s/g,'').slice(0,2)));
+    if(l.length)found.push({t,l:l.slice(0,3)})}catch(er){}}};
+  await Promise.all([work(),work(),work()]);
+  if(!found.length){o.innerHTML='<p class="note">읽은 글자 중에 약 이름을 찾지 못했어요. 더 밝고 가까이 찍거나 위에서 직접 검색해 주세요.</p><details><summary class="note">읽은 글자 보기</summary><pre style="white-space:pre-wrap;font-size:13px">'+esc(text)+'</pre></details>';return}
+  o.innerHTML='<p class="note" style="margin-top:10px">사진에서 찾은 약 후보예요. <b>약봉투에 적힌 이름과 같은지 확인하고</b> 추가하세요.</p>'+found.map(x=>'<div style="margin-top:8px"><small class="note">읽은 글자: '+esc(x.t)+'</small>'+x.l.map(d=>'<button type="button" class="addbtn" style="margin-top:4px" data-seq="'+esc(d.ITEM_SEQ)+'" data-name="'+esc(short(d.ITEM_NAME))+'"><span>'+esc(d.ITEM_NAME)+'<br><small>'+esc(d.ENTP_NAME)+'</small></span><span>＋ 추가</span></button>').join('')+'</div>').join('')+'<details style="margin-top:8px"><summary class="note">읽은 글자 전체 보기</summary><pre style="white-space:pre-wrap;font-size:13px">'+esc(text)+'</pre></details>';
+});
+$('#ocrOut').addEventListener('click',e=>{const b=e.target.closest('[data-seq]');if(b){add(b.dataset.seq,b.dataset.name);b.disabled=true;b.lastChild.textContent='✓ 추가됨'}});
 }</script>
 <p style="margin-top:28px"><button class="btn" type="button" id="shareBtn">이 페이지 공유하기</button> <span class="note" id="shareMsg"></span></p>
 <script>{const b=document.getElementById('shareBtn'),m=document.getElementById('shareMsg');b.addEventListener('click',async()=>{const d={title:document.title,url:location.href};try{if(navigator.share){await navigator.share(d);return}await navigator.clipboard.writeText(location.href);m.textContent='주소를 복사했어요. 카톡에 붙여넣어 보내세요.'}catch(e){if(e&&e.name==='AbortError')return;m.textContent=location.href}})}</script>
 </div></main>
 <footer class="band"><div class="wrap">
-  <p><a href="/">약 검색</a> · <a href="/er">가까운 응급실</a> · <a href="/moonlight">달빛어린이병원</a> · <a href="/clinic">문 연 병원</a> · <a href="/check">같이 먹어도 되나요?</a> · <a href="/pill">모양으로 약 찾기</a> · <a href="/pharmacy">지역별 약국 영업시간</a> · <a href="/convenience">편의점 상비약</a> · <a href="/symptom">증상별 약</a> · <a href="/ingredient">성분별 약</a> · <a href="/disposal">남은 약 버리는 법</a> · <a href="/recall">회수·판매중지 약</a></p>
+<p id="instRow" hidden style="margin:0 0 10px"><button class="btn red" type="button" id="instBtn">📲 홈 화면에 앱처럼 추가</button></p><p id="instIos" class="note" hidden style="margin:0 0 10px">아이폰: 아래 <b>공유 버튼(□↑)</b>을 누르고 <b>‘홈 화면에 추가’</b>를 고르세요.</p>
+<script>{let ev=null;const row=document.getElementById('instRow'),btn=document.getElementById('instBtn'),ios=document.getElementById('instIos');const sa=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();ev=e;row.hidden=false});
+if(!sa&&/iphone|ipad|ipod/i.test(navigator.userAgent)){row.hidden=false;btn.onclick=()=>{ios.hidden=!ios.hidden}}
+else btn.onclick=async()=>{if(!ev)return;ev.prompt();await ev.userChoice.catch(()=>{});ev=null;row.hidden=true};}</script>
+  <p><a href="/">약 검색</a> · <a href="/er">가까운 응급실</a> · <a href="/scan">바코드로 약 찾기</a> · <a href="/mybox">우리 집 약 상자</a> · <a href="/moonlight">달빛어린이병원</a> · <a href="/clinic">문 연 병원</a> · <a href="/check">같이 먹어도 되나요?</a> · <a href="/pill">모양으로 약 찾기</a> · <a href="/pharmacy">지역별 약국 영업시간</a> · <a href="/convenience">편의점 상비약</a> · <a href="/symptom">증상별 약</a> · <a href="/ingredient">성분별 약</a> · <a href="/disposal">남은 약 버리는 법</a> · <a href="/recall">회수·판매중지 약</a></p>
   <p>약 정보: 식품의약품안전처 의약품 제품 허가정보·의약품개요정보(e약은요). 약국 정보: 국립중앙의료원 전국 약국 정보. 공공데이터포털(data.go.kr) 제공.</p>
   <p>영업시간은 약국이 신고한 정보라 실제와 다를 수 있어요. 방문 전에 꼭 전화로 확인하세요. 이 사이트는 정보 안내만 하며 약을 팔지 않습니다. 복용은 약사나 의사와 상담하세요.</p>
 </div></footer>

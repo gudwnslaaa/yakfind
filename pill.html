@@ -9,6 +9,7 @@
 <meta property="og:title" content="알약 모양·색·글자로 무슨 약인지 찾기 | 이 약, 어디 있지?"><meta property="og:description" content="알약에 새겨진 글자, 모양, 색으로 식약처 낱알식별 정보 2만5천여 개 중에서 무슨 약인지 찾아보세요. 사진과 함께 보여드려요.">
 <meta property="og:url" content="https://yakfind.vercel.app/pill"><meta property="og:image" content="https://yakfind.vercel.app/og.png">
 <meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#d1291f">
+<link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="약 찾기">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23d1291f'/%3E%3Ctext x='32' y='45' font-size='38' font-weight='800' text-anchor='middle' fill='white' font-family='sans-serif'%3E%EC%95%BD%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@600;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
@@ -61,6 +62,11 @@ footer{border-top:1px solid var(--line);color:var(--mute);font-size:14px;margin-
 <nav class="crumb"><a href="/">약 검색</a> › 모양으로 약 찾기</nav>
 <h1>이 알약, 무슨 약이지?</h1>
 <p class="sub">알약에 새겨진 글자, 모양, 색을 고르면 식약처 낱알식별 정보 2만5천여 개 중에서 찾아 드려요. 글자를 넣으면 가장 정확해요.</p>
+<div class="box" id="ph"><b>📷 알약 사진으로 보면서 고르기</b><p class="note" style="margin:6px 0 10px">알약을 밝은 곳에서 크게 찍으면, 확대해서 새겨진 글자를 읽고 <b>알약을 눌러 색을 고를 수 있어요</b>. 사진은 휴대폰 안에서만 보여요.</p>
+  <label class="btn" style="display:inline-flex;align-items:center;cursor:pointer">사진 찍기·고르기<input id="pfile" type="file" accept="image/*" capture="environment" hidden></label>
+  <div id="pview" hidden><div id="pbox" style="margin-top:12px;overflow:auto;max-height:60vh;border-radius:12px;background:#000;touch-action:pan-x pan-y;cursor:crosshair"><img id="pimg" alt="찍은 알약 사진" style="display:block;width:100%;max-width:none"></div>
+  <p style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 0"><button type="button" class="btn" id="zin">＋ 크게</button><button type="button" class="btn" id="zout">－ 작게</button><span class="note" id="pmsg">알약 위를 누르면 색을 골라 드려요.</span></p></div>
+</div>
 <form id="pf" class="box" style="display:grid;gap:16px">
   <label><b>알약에 적힌 글자·숫자</b> <small class="note">앞면이나 뒷면, 한쪽만 넣어도 돼요</small><br><input id="pp" type="search" placeholder="예: TYLENOL, YH, 500" style="margin-top:8px;width:100%;height:48px;border:1px solid var(--line);border-radius:12px;padding:0 14px;font:inherit;font-size:16px;background:var(--bg);color:var(--ink)"></label>
   <div><b>모양</b><div class="chips2" id="shapes"><button type="button" class="fchip on" data-shape="">상관없음</button><button type="button" class="fchip" data-shape="원형">원형</button><button type="button" class="fchip" data-shape="타원형">타원형</button><button type="button" class="fchip" data-shape="장방형">장방형</button><button type="button" class="fchip" data-shape="반원형">반원형</button><button type="button" class="fchip" data-shape="삼각형">삼각형</button><button type="button" class="fchip" data-shape="사각형">사각형</button><button type="button" class="fchip" data-shape="마름모형">마름모형</button><button type="button" class="fchip" data-shape="오각형">오각형</button><button type="button" class="fchip" data-shape="육각형">육각형</button><button type="button" class="fchip" data-shape="팔각형">팔각형</button><button type="button" class="fchip" data-shape="기타">기타</button></div></div>
@@ -96,12 +102,29 @@ $('#pf').addEventListener('submit',async e=>{e.preventDefault();
   }catch(er){$('#pout').innerHTML='<p class="note">'+esc(er.message||'오류가 났어요.')+'</p>'}});
 const u=new URLSearchParams(location.search);
 if([...u].length){$('#pp').value=u.get('print')||'';for(const [id,k] of [['#shapes','shape'],['#colors','color'],['#forms','form'],['#lines','line']]){const v=u.get(k)||'';const b=[...$(id).children].find(x=>x.dataset[k]===v);if(b)b.click()}$('#pf').requestSubmit()}
+
+{const CO2=[["하양","#ffffff"],["노랑","#f6d33c"],["주황","#f39a2b"],["분홍","#f4a6c0"],["빨강","#d93a3a"],["갈색","#8b5a2b"],["연두","#a8d65a"],["초록","#2f9e4f"],["청록","#1aa3a3"],["파랑","#2f6fd6"],["남색","#23337a"],["자주","#a23a7a"],["보라","#8255c9"],["회색","#9aa0a6"],["검정","#222222"],["투명","linear-gradient(135deg,#eef3f7,#cfd9e2)"]];const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+ const near=([r,g,b])=>{const mx=Math.max(r,g,b),mn=Math.min(r,g,b);if(mx>215&&mx-mn<28)return '하양';if(mx<55)return '검정';if(mx-mn<22)return '회색';let best='',bd=1e9;for(const [n,c] of CO2){if(!c.startsWith('#')||n==='하양'||n==='검정'||n==='회색')continue;const [R,G,B]=hex(c);const d=(R-r)**2*.3+(G-g)**2*.59+(B-b)**2*.11;if(d<bd){bd=d;best=n}}return best};
+ let z=1,cv=null;const img=document.getElementById('pimg');
+ document.getElementById('pfile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);img.onload=()=>{cv=document.createElement('canvas');const k=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight));cv.width=img.naturalWidth*k;cv.height=img.naturalHeight*k;cv.getContext('2d',{willReadFrequently:true}).drawImage(img,0,0,cv.width,cv.height);document.getElementById('pview').hidden=false;z=1;img.style.width='100%'};img.src=u});
+ const zoom=f=>{z=Math.max(1,Math.min(5,z*f));img.style.width=(z*100)+'%'};
+ document.getElementById('zin').addEventListener('click',()=>zoom(1.5));document.getElementById('zout').addEventListener('click',()=>zoom(1/1.5));
+ img.addEventListener('click',e=>{if(!cv)return;const r=img.getBoundingClientRect();const x=Math.round((e.clientX-r.left)/r.width*cv.width),y=Math.round((e.clientY-r.top)/r.height*cv.height);
+   const d=cv.getContext('2d').getImageData(Math.max(0,x-4),Math.max(0,y-4),9,9).data;let R=0,G=0,B=0,n=0;for(let i=0;i<d.length;i+=4){R+=d[i];G+=d[i+1];B+=d[i+2];n++}
+   const c=[R/n,G/n,B/n].map(Math.round),nm=near(c);const btn=[...document.querySelectorAll('#colors [data-color]')].find(b=>b.dataset.color===nm);if(btn)btn.click();
+   document.getElementById('pmsg').innerHTML='<i style="display:inline-block;width:18px;height:18px;border-radius:50%;vertical-align:-4px;border:1px solid var(--line);background:rgb('+c.join(',')+')"></i> 고른 색: <b>'+nm+'</b> — 아래 색 선택에 반영했어요. 글자도 읽어서 넣어 주세요.'})}
 }</script>
 <p style="margin-top:28px"><button class="btn" type="button" id="shareBtn">이 페이지 공유하기</button> <span class="note" id="shareMsg"></span></p>
 <script>{const b=document.getElementById('shareBtn'),m=document.getElementById('shareMsg');b.addEventListener('click',async()=>{const d={title:document.title,url:location.href};try{if(navigator.share){await navigator.share(d);return}await navigator.clipboard.writeText(location.href);m.textContent='주소를 복사했어요. 카톡에 붙여넣어 보내세요.'}catch(e){if(e&&e.name==='AbortError')return;m.textContent=location.href}})}</script>
 </div></main>
 <footer class="band"><div class="wrap">
-  <p><a href="/">약 검색</a> · <a href="/er">가까운 응급실</a> · <a href="/moonlight">달빛어린이병원</a> · <a href="/clinic">문 연 병원</a> · <a href="/check">같이 먹어도 되나요?</a> · <a href="/pill">모양으로 약 찾기</a> · <a href="/pharmacy">지역별 약국 영업시간</a> · <a href="/convenience">편의점 상비약</a> · <a href="/symptom">증상별 약</a> · <a href="/ingredient">성분별 약</a> · <a href="/disposal">남은 약 버리는 법</a> · <a href="/recall">회수·판매중지 약</a></p>
+<p id="instRow" hidden style="margin:0 0 10px"><button class="btn red" type="button" id="instBtn">📲 홈 화면에 앱처럼 추가</button></p><p id="instIos" class="note" hidden style="margin:0 0 10px">아이폰: 아래 <b>공유 버튼(□↑)</b>을 누르고 <b>‘홈 화면에 추가’</b>를 고르세요.</p>
+<script>{let ev=null;const row=document.getElementById('instRow'),btn=document.getElementById('instBtn'),ios=document.getElementById('instIos');const sa=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();ev=e;row.hidden=false});
+if(!sa&&/iphone|ipad|ipod/i.test(navigator.userAgent)){row.hidden=false;btn.onclick=()=>{ios.hidden=!ios.hidden}}
+else btn.onclick=async()=>{if(!ev)return;ev.prompt();await ev.userChoice.catch(()=>{});ev=null;row.hidden=true};}</script>
+  <p><a href="/">약 검색</a> · <a href="/er">가까운 응급실</a> · <a href="/scan">바코드로 약 찾기</a> · <a href="/mybox">우리 집 약 상자</a> · <a href="/moonlight">달빛어린이병원</a> · <a href="/clinic">문 연 병원</a> · <a href="/check">같이 먹어도 되나요?</a> · <a href="/pill">모양으로 약 찾기</a> · <a href="/pharmacy">지역별 약국 영업시간</a> · <a href="/convenience">편의점 상비약</a> · <a href="/symptom">증상별 약</a> · <a href="/ingredient">성분별 약</a> · <a href="/disposal">남은 약 버리는 법</a> · <a href="/recall">회수·판매중지 약</a></p>
   <p>약 정보: 식품의약품안전처 의약품 제품 허가정보·의약품개요정보(e약은요). 약국 정보: 국립중앙의료원 전국 약국 정보. 공공데이터포털(data.go.kr) 제공.</p>
   <p>영업시간은 약국이 신고한 정보라 실제와 다를 수 있어요. 방문 전에 꼭 전화로 확인하세요. 이 사이트는 정보 안내만 하며 약을 팔지 않습니다. 복용은 약사나 의사와 상담하세요.</p>
 </div></footer>

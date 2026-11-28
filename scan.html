@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>약 바코드 찍어서 무슨 약인지·회수 대상인지 확인 | 이 약, 어디 있지?</title>
+<meta name="description" content="약 상자 바코드를 휴대폰 카메라로 비추면 무슨 약인지, 회수·판매중지 대상인지, 사용기한이 지났는지 바로 알려드려요. 무료, 설치 필요 없음.">
+<link rel="canonical" href="https://yakfind.vercel.app/scan">
+
+<meta property="og:type" content="website"><meta property="og:site_name" content="이 약, 어디 있지?">
+<meta property="og:title" content="약 바코드 찍어서 무슨 약인지·회수 대상인지 확인 | 이 약, 어디 있지?"><meta property="og:description" content="약 상자 바코드를 휴대폰 카메라로 비추면 무슨 약인지, 회수·판매중지 대상인지, 사용기한이 지났는지 바로 알려드려요. 무료, 설치 필요 없음.">
+<meta property="og:url" content="https://yakfind.vercel.app/scan"><meta property="og:image" content="https://yakfind.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#d1291f">
+<link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="약 찾기">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23d1291f'/%3E%3Ctext x='32' y='45' font-size='38' font-weight='800' text-anchor='middle' fill='white' font-family='sans-serif'%3E%EC%95%BD%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@600;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>:root{color-scheme:light dark;--bg:light-dark(#ffffff,#15171a);--paper:light-dark(#f6f3ee,#1f2226);--ink:light-dark(#1b1d20,#eceae6);--mute:light-dark(#5f646b,#a3a7ad);--line:light-dark(#e3ded6,#33373c);--red:light-dark(#d1291f,#ff6a5e);--redbg:light-dark(#fdecea,#3a1f1d);--ok:light-dark(#1f6f45,#7fd3a3);--okbg:light-dark(#e6f4ec,#1d3327);--warnbg:light-dark(#fff1d6,#3a2e14);--warn:light-dark(#8a5a00,#f3c96b)}
+*{box-sizing:border-box;min-width:0}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Gothic A1","Noto Sans KR",sans-serif;line-height:1.2;text-wrap:balance;margin:0}a{color:inherit}
+.band{padding:clamp(18px,3vw,40px) max(5vw,16px)}.wrap{max-width:980px;margin:0 auto}
+header.band{border-bottom:1px solid var(--line);padding-top:16px;padding-bottom:16px}
+.top{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.brand{display:flex;gap:10px;align-items:center;text-decoration:none;font:800 20px "Gothic A1",sans-serif}
+.sign{width:38px;height:38px;border-radius:10px;background:var(--red);color:#fff;display:grid;place-items:center;font:800 22px/1 "Gothic A1",sans-serif}
+form.s{display:flex;gap:8px;flex:1;max-width:420px}form.s input{flex:1;height:44px;border:1px solid var(--line);border-radius:12px;padding:0 14px;font:inherit;font-size:16px;background:var(--bg);color:var(--ink)}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;font-weight:600;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn.red{background:var(--red);border-color:var(--red);color:#fff}.btn.ink{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.crumb{font-size:14px;color:var(--mute);margin-bottom:10px}.crumb a{color:var(--mute)}
+h1{font-size:clamp(26px,4vw,40px);font-weight:800}h2{font-size:21px;font-weight:800;margin:32px 0 12px}
+.sub{color:var(--mute);margin:6px 0 0}
+.tag{display:inline-block;font-size:13px;font-weight:600;border-radius:6px;padding:1px 8px;white-space:nowrap}
+.rx{background:var(--redbg);color:var(--red)}.otc,.open{background:var(--okbg);color:var(--ok)}.soon,.late{background:var(--warnbg);color:var(--warn)}.closed{background:var(--paper);color:var(--mute)}
+.photo{display:block;width:100%;max-width:560px;border-radius:14px;overflow:hidden;border:1px solid var(--line);margin:18px 0 6px;background:#fff}.photo img{display:block;width:100%;aspect-ratio:780/426;object-fit:cover}
+.cap{font-size:13px;color:var(--mute);margin:0 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chips span{background:var(--paper);border-radius:8px;padding:4px 10px;font-weight:500}
+.box{background:var(--paper);border-radius:16px;padding:18px 20px;margin:20px 0}.box.cta{border-top:5px solid var(--red)}
+.sec p{margin:6px 0 0;white-space:pre-line;max-width:72ch}
+.list{display:flex;flex-direction:column;gap:8px;list-style:none;padding:0;margin:0}
+.it{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-decoration:none;color:var(--ink)}a.it:hover{border-color:var(--ink)}
+.it b{display:block}.it small{color:var(--mute);font-size:14px}
+.thumb{flex:none;width:64px;height:44px;border-radius:8px;background:var(--paper);overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;list-style:none;padding:0;margin:0}
+.grid a{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-decoration:none}.grid a:hover{border-color:var(--ink)}.grid small{color:var(--mute)}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}.stats div{background:var(--paper);border-radius:12px;padding:10px 16px}.stats b{font-size:22px;display:block}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.fchip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;font:inherit;font-weight:500}.fchip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ph{border:1px solid var(--line);border-radius:14px;padding:14px 16px}.ph .hd{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.ph h3{font-size:18px}
+.ph .addr{color:var(--mute);font-size:14px;margin:2px 0 8px}.ph .badges{display:flex;gap:6px;flex-wrap:wrap}
+.hrs{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin:10px 0;font-size:13px;text-align:center}
+.hrs div{background:var(--paper);border-radius:8px;padding:6px 2px}.hrs b{display:block;font-size:12px;color:var(--mute);font-weight:500}.hrs .off{opacity:.55}.hrs .today{outline:2px solid var(--red)}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.note{font-size:14px;color:var(--mute)}
+li.dur{border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:12px;padding:10px 14px}li.dur b{display:block}li.dur small{color:var(--mute);font-size:14px}li.dur a{color:var(--ink)}
+footer{border-top:1px solid var(--line);color:var(--mute);font-size:14px;margin-top:40px}footer p{margin:4px 0;max-width:80ch}footer a{color:var(--mute)}
+@media(max-width:600px){.hrs{grid-template-columns:repeat(4,minmax(0,1fr))}form.s{max-width:none;flex-basis:100%}}</style>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</head><body>
+<header class="band"><div class="wrap top">
+  <a class="brand" href="/"><span class="sign" aria-hidden="true">약</span>이 약, 어디 있지?</a>
+  <form class="s" action="/" method="get" role="search"><input name="q" type="search" placeholder="약 이름 검색" aria-label="약 이름" required minlength="2"><button class="btn ink" type="submit">찾기</button></form>
+</div></header>
+<main class="band"><div class="wrap">
+<nav class="crumb"><a href="/">약 검색</a> › 바코드로 약 찾기</nav>
+<h1>약 상자 바코드 찍기</h1>
+<p class="sub">약 상자나 병에 있는 바코드를 비추면 무슨 약인지, 회수 대상인지 바로 알려드려요. 네모난 2D 바코드를 찍으면 <b>제조번호와 사용기한</b>까지 읽어요.</p>
+<div class="box" style="display:grid;gap:12px">
+  <button class="btn red big" id="cam" type="button">📷 카메라로 바코드 찍기</button>
+  <div id="camWrap" hidden><div class="vf"><video id="vid" playsinline muted></video><i></i></div><p class="note" id="camMsg" style="text-align:center">바코드를 네모 안에 맞춰 주세요. 가까이 대고 천천히 움직이면 잘 읽혀요.</p><button class="btn" id="camStop" type="button" style="width:100%">카메라 끄기</button></div>
+  <label class="btn" style="display:flex;align-items:center;justify-content:center;cursor:pointer">🖼 사진으로 찍기·고르기<input id="photo" type="file" accept="image/*" capture="environment" hidden></label>
+  <form id="mf" style="display:flex;gap:8px"><input id="mcode" inputmode="numeric" pattern="[0-9]*" maxlength="13" placeholder="바코드 아래 숫자 13자리 (880…)" aria-label="바코드 숫자" style="flex:1;min-width:0;height:48px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font:inherit;font-size:16px;background:var(--bg);color:var(--ink)"><button class="btn ink" type="submit">찾기</button></form>
+</div>
+<div id="out" aria-live="polite"></div>
+<details class="box" style="margin-top:18px"><summary><b>잘 안 읽혀요</b></summary><ul class="note" style="margin:10px 0 0;padding-left:18px"><li>밝은 곳에서, 바코드가 화면 가운데 크게 오도록 찍어 주세요.</li><li>병이나 둥근 용기는 바코드가 휘지 않게 옆으로 살짝 돌려 보세요.</li><li>그래도 안 되면 바코드 아래 <b>880으로 시작하는 13자리 숫자</b>를 직접 넣어 주세요.</li><li>건강기능식품(영양제)·화장품은 의약품 바코드가 아니라서 나오지 않아요.</li></ul></details>
+<p class="note" style="margin-top:16px">카메라 영상과 사진은 휴대폰 안에서만 읽고 어디에도 보내지 않아요. 자료: 식품의약품안전처 의약품 제품 허가정보.</p>
+<style>.big{height:56px;font-size:18px;width:100%}.vf{position:relative;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:4/3}.vf video{width:100%;height:100%;object-fit:cover;display:block}.vf i{position:absolute;inset:22% 10%;border:3px solid #fff;border-radius:12px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.card{border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:16px;background:var(--paper)}.card h2{font-size:21px;margin:0 0 4px}.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:12px 0;font-size:15px}.kv b{color:var(--mute);font-weight:500}
+.res{border-radius:14px;padding:12px 14px;margin-top:12px}.res.stop{background:var(--redbg);border-left:5px solid var(--red)}.res.warn{background:var(--warnbg);border-left:5px solid var(--warn)}.res.ok{background:var(--okbg);border-left:5px solid var(--ok)}
+.save{display:grid;gap:10px;margin-top:14px;border-top:1px solid var(--line);padding-top:14px}.save label{display:grid;gap:4px;font-size:15px}.save select,.save input{height:46px;border:1px solid var(--line);border-radius:12px;padding:0 10px;font:inherit;font-size:16px;background:var(--bg);color:var(--ink)}</style>
+<script type="module">
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const BOX=(()=>{const K='yak_mine';
+ const get=()=>{try{const a=JSON.parse(localStorage.getItem(K))||[];return a.map(x=>({who:'나',...x}))}catch(e){return[]}};
+ const set=a=>{try{localStorage.setItem(K,JSON.stringify(a.slice(0,80)))}catch(e){}};
+ const people=()=>{const s=new Set(['나']);get().forEach(x=>s.add(x.who||'나'));try{(JSON.parse(localStorage.getItem('yak_people'))||[]).forEach(p=>s.add(p))}catch(e){}return [...s]};
+ const addPerson=p=>{p=String(p||'').trim().slice(0,10);if(!p)return;let a=[];try{a=JSON.parse(localStorage.getItem('yak_people'))||[]}catch(e){}if(!a.includes(p)){a.push(p);try{localStorage.setItem('yak_people',JSON.stringify(a))}catch(e){}}return p};
+ const add=it=>{const a=get();const i=a.findIndex(x=>x.seq===it.seq&&(x.who||'나')===(it.who||'나')&&(x.lot||'')===(it.lot||''));const v={who:'나',at:Date.now(),...(i>=0?a[i]:{}),...it};if(i>=0)a[i]=v;else a.unshift(v);set(a);return v};
+ const days=exp=>{if(!exp)return null;const d=new Date(exp+'T00:00:00');if(isNaN(d))return null;return Math.floor((d-new Date(new Date().toDateString()))/864e5)};
+ return {get,set,people,addPerson,add,days}})();
+
+let Det=null;
+async function detector(){ if(Det)return Det;
+  const F=['ean_13','data_matrix','code_128','qr_code'];
+  if('BarcodeDetector' in window){try{const s=await BarcodeDetector.getSupportedFormats();if(s.includes('ean_13'))return Det=new BarcodeDetector({formats:F.filter(f=>s.includes(f))})}catch(e){}}
+  const m=await import('https://fastly.jsdelivr.net/npm/barcode-detector@3/dist/es/ponyfill.min.js');
+  return Det=new m.BarcodeDetector({formats:F});
+}
+// GS1 2D 바코드: (01)GTIN14 (17)사용기한YYMMDD (10)제조번호 (21)일련번호
+function parse(raw){ let s=String(raw||'').replace(/^\]d2|^\]C1|^\]Q3/,'');
+  const out={raw:s};
+  if(/^880\d{10}$/.test(s)){out.code=s;return out}
+  if(/^0?880\d{10}$/.test(s.replace(/\D/g,''))&&s.replace(/\D/g,'').length<=14){out.code=s.replace(/\D/g,'').slice(-13);return out}
+  const GS=String.fromCharCode(29); const fixed={'01':14,'17':6,'11':6,'15':6};
+  let i=0;s=s.replace(/\(|\)/g,m=>m==='('?GS:'');if(s[0]===GS)s=s.slice(1);
+  while(i<s.length){const ai=s.slice(i,i+2);i+=2;
+    if(fixed[ai]){const v=s.slice(i,i+fixed[ai]);i+=fixed[ai];if(s[i]===GS)i++;
+      if(ai==='01')out.code=v.slice(1);if(ai==='17'){const y=2000+ +v.slice(0,2),mo=v.slice(2,4),d=v.slice(4,6)==='00'?String(new Date(y,+mo,0).getDate()):v.slice(4,6);out.exp=y+'-'+mo+'-'+d.padStart(2,'0')}}
+    else if(ai==='10'||ai==='21'){let j=s.indexOf(GS,i);if(j<0)j=s.length;const v=s.slice(i,j);i=j+1;if(ai==='10')out.lot=v;else out.serial=v}
+    else break;}
+  if(out.code&&!/^880\d{10}$/.test(out.code))out.code='';
+  return out;
+}
+let stream=null,timer=null,busy=false;
+function stopCam(){if(timer)clearInterval(timer);timer=null;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;$('#camWrap').hidden=true;$('#cam').hidden=false}
+$('#camStop').addEventListener('click',stopCam);
+$('#cam').addEventListener('click',async()=>{
+  $('#out').innerHTML='';
+  try{ const d=detector(); stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:960}},audio:false});
+    const v=$('#vid');v.srcObject=stream;await v.play();$('#camWrap').hidden=false;$('#cam').hidden=true;$('#camWrap').scrollIntoView({block:'center',behavior:'smooth'});
+    const det=await d;
+    timer=setInterval(async()=>{if(busy||!stream)return;busy=true;try{const r=await det.detect(v);const hit=r.map(x=>parse(x.rawValue)).find(x=>x.code);if(hit){navigator.vibrate&&navigator.vibrate(80);stopCam();show(hit)}}catch(e){}busy=false},250);
+  }catch(e){stopCam();$('#out').innerHTML='<p class="res warn">카메라를 켜지 못했어요. 카메라 권한을 허용했는지 확인해 주세요. 안 되면 <b>사진으로 찍기</b>나 숫자 입력을 써 주세요.</p>'}
+});
+$('#photo').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;$('#out').innerHTML='<p class="note">사진에서 바코드를 찾는 중…</p>';
+  try{const det=await detector();const bmp=await createImageBitmap(f);const r=await det.detect(bmp);const hit=r.map(x=>parse(x.rawValue)).find(x=>x.code);
+    if(hit)show(hit);else $('#out').innerHTML='<p class="res warn">사진에서 약 바코드를 찾지 못했어요. 바코드가 크고 선명하게 나오게 다시 찍거나, 아래 숫자 13자리를 직접 넣어 주세요.</p>';
+  }catch(er){$('#out').innerHTML='<p class="res warn">바코드를 읽는 도구를 불러오지 못했어요. 숫자 13자리를 직접 넣어 주세요.</p>'}
+  e.target.value='';});
+$('#mf').addEventListener('submit',e=>{e.preventDefault();const p=parse($('#mcode').value.replace(/\D/g,''));if(!p.code){$('#out').innerHTML='<p class="res warn">880으로 시작하는 13자리 숫자를 넣어 주세요.</p>';return}show(p)});
+const fmt=s=>s?s.replace(/-/g,'.'):'';
+async function show(p){
+  $('#out').innerHTML='<p class="note">약 정보를 찾는 중…</p>';
+  let j;try{j=await (await fetch('/api/yak?action=barcode&code='+p.code)).json()}catch(e){j={ok:false,error:'연결이 끊겼어요. 다시 시도해 주세요.'}}
+  if(!j.ok){$('#out').innerHTML='<p class="res warn">'+esc(j.error||'오류가 났어요.')+'</p>';return}
+  const d=j.items[0];
+  if(!d){$('#out').innerHTML='<div class="card"><b>바코드 '+esc(p.code)+'</b><p class="note">등록된 의약품을 찾지 못했어요. 건강기능식품·의약외품이거나 바코드가 바뀐 제품일 수 있어요. <a href="/?q=">약 이름으로 검색</a>해 보세요.</p></div>';return}
+  const rx=/전문/.test(d.ETC_OTC_CODE||'');const cancel=/취소|취하/.test(d.CANCEL_NAME||'');
+  const nm=String(d.ITEM_NAME||'').replace(/\(.*?\)/g,'').trim();
+  const dd=p.exp?BOX.days(p.exp):null;
+  let h='<div class="card"><p class="note" style="margin:0">'+esc(d.ENTP_NAME)+' · <span class="tag '+(rx?'rx':'otc')+'">'+(rx?'전문의약품':'일반의약품')+'</span></p><h2>'+esc(d.ITEM_NAME)+'</h2>';
+  if(cancel)h+='<p class="res stop"><b>허가가 '+esc(d.CANCEL_NAME)+'된 약이에요.</b> 먹기 전에 약사에게 확인하세요.</p>';
+  h+='<div class="kv">'+(p.exp?'<b>사용기한</b><span>'+esc(fmt(p.exp))+(dd<0?' <span class="tag closed" style="background:var(--redbg);color:var(--red)">지났어요</span>':dd<=30?' <span class="tag soon">'+dd+'일 남음</span>':'')+'</span>':'')+(p.lot?'<b>제조번호</b><span>'+esc(p.lot)+'</span>':'')+(d.CHART?'<b>모양</b><span>'+esc(d.CHART)+'</span>':'')+(d.STORAGE_METHOD?'<b>보관</b><span>'+esc(d.STORAGE_METHOD)+'</span>':'')+(d.VALID_TERM?'<b>유효기간</b><span>'+esc(d.VALID_TERM)+'</span>':'')+'</div>';
+  if(dd!==null&&dd<0)h+='<p class="res stop">사용기한이 지난 약이에요. 먹지 말고 <a href="/disposal">약국·보건소 폐의약품 수거함</a>에 버려 주세요.</p>';
+  h+='<div id="rc"><p class="note">회수 대상인지 확인 중…</p></div>';
+  h+='<p style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0"><a class="btn ink" href="/drug/'+esc(d.ITEM_SEQ)+'">약 정보 자세히 보기</a><a class="btn" href="/check?seqs='+esc(d.ITEM_SEQ)+'">같이 먹어도 되나요?</a></p>';
+  const ps=BOX.people();
+  h+='<form class="save" id="sv"><b>우리 집 약 상자에 넣기</b><label>누구 약인가요?<select id="who">'+ps.map(x=>'<option>'+esc(x)+'</option>').join('')+'<option value="__new">＋ 사람 추가</option></select></label><input id="newWho" placeholder="이름 (예: 엄마, 아이)" maxlength="10" hidden><label>사용기한 <small class="note">상자에 적힌 날짜</small><input id="exp" type="date" value="'+esc(p.exp||'')+'"></label><button class="btn red" type="submit">★ 약 상자에 저장</button><p class="note" id="svMsg" style="margin:0"></p></form></div>';
+  $('#out').innerHTML=h;$('#out').scrollIntoView({block:'start',behavior:'smooth'});
+  $('#who').addEventListener('change',e=>{$('#newWho').hidden=e.target.value!=='__new';if(!$('#newWho').hidden)$('#newWho').focus()});
+  $('#sv').addEventListener('submit',e=>{e.preventDefault();let who=$('#who').value;if(who==='__new'){who=BOX.addPerson($('#newWho').value);if(!who){$('#newWho').focus();return}}
+    BOX.add({seq:d.ITEM_SEQ,name:nm,who,exp:$('#exp').value||'',lot:p.lot||''});
+    $('#svMsg').innerHTML='저장했어요. <a href="/mybox">약 상자 열기 →</a>';});
+  try{const r=await (await fetch('/api/recall?seqs='+d.ITEM_SEQ)).json();const list=(r.items||[]);
+    let rc;
+    if(!list.length)rc='<p class="res ok">✓ 회수·판매중지 목록에 없는 약이에요.</p>';
+    else{const lots=list.flatMap(x=>String(x.lot||'').split(/,\s*/)).filter(Boolean);
+      const mine=p.lot&&lots.some(l=>l.replace(/\s/g,'').toUpperCase()===p.lot.replace(/\s/g,'').toUpperCase());
+      if(mine)rc='<p class="res stop"><b>⛔ 이 제조번호('+esc(p.lot)+')는 회수 대상이에요.</b><br>먹지 말고 산 약국에 가져가 문의하세요. 이유: '+esc(list[0].reason||'공개되지 않음')+'</p>';
+      else if(p.lot)rc='<p class="res warn">이 약의 <b>다른 제조번호</b>가 회수된 적이 있어요. 이 상자(제조번호 '+esc(p.lot)+')는 목록에 없어요.<br><small>회수된 번호: '+esc(lots.slice(0,6).join(', ')||'공개되지 않음')+'</small></p>';
+      else rc='<p class="res warn"><b>이 약은 회수된 적이 있어요.</b> 상자의 제조번호가 아래와 같은지 확인하세요.<br><small>회수된 번호: '+esc(lots.slice(0,8).join(', ')||'공개되지 않음')+' · '+esc(list[0].date?list[0].date.slice(0,4)+'.'+list[0].date.slice(4,6):'')+'</small></p>';}
+    $('#rc').innerHTML=rc;
+  }catch(e){$('#rc').innerHTML=''}
+}
+const c0=new URLSearchParams(location.search).get('code');if(c0){const p=parse(c0);if(p.code)show(p)}
+</script>
+<p style="margin-top:28px"><button class="btn" type="button" id="shareBtn">이 페이지 공유하기</button> <span class="note" id="shareMsg"></span></p>
+<script>{const b=document.getElementById('shareBtn'),m=document.getElementById('shareMsg');b.addEventListener('click',async()=>{const d={title:document.title,url:location.href};try{if(navigator.share){await navigator.share(d);return}await navigator.clipboard.writeText(location.href);m.textContent='주소를 복사했어요. 카톡에 붙여넣어 보내세요.'}catch(e){if(e&&e.name==='AbortError')return;m.textContent=location.href}})}</script>
+</div></main>
+<footer class="band"><div class="wrap">
+<p id="instRow" hidden style="margin:0 0 10px"><button class="btn red" type="button" id="instBtn">📲 홈 화면에 앱처럼 추가</button></p><p id="instIos" class="note" hidden style="margin:0 0 10px">아이폰: 아래 <b>공유 버튼(□↑)</b>을 누르고 <b>‘홈 화면에 추가’</b>를 고르세요.</p>
+<script>{let ev=null;const row=document.getElementById('instRow'),btn=document.getElementById('instBtn'),ios=document.getElementById('instIos');const sa=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();ev=e;row.hidden=false});
+if(!sa&&/iphone|ipad|ipod/i.test(navigator.userAgent)){row.hidden=false;btn.onclick=()=>{ios.hidden=!ios.hidden}}
+else btn.onclick=async()=>{if(!ev)return;ev.prompt();await ev.userChoice.catch(()=>{});ev=null;row.hidden=true};}</script>
+  <p><a href="/">약 검색</a> · <a href="/er">가까운 응급실</a> · <a href="/scan">바코드로 약 찾기</a> · <a href="/mybox">우리 집 약 상자</a> · <a href="/moonlight">달빛어린이병원</a> · <a href="/clinic">문 연 병원</a> · <a href="/check">같이 먹어도 되나요?</a> · <a href="/pill">모양으로 약 찾기</a> · <a href="/pharmacy">지역별 약국 영업시간</a> · <a href="/convenience">편의점 상비약</a> · <a href="/symptom">증상별 약</a> · <a href="/ingredient">성분별 약</a> · <a href="/disposal">남은 약 버리는 법</a> · <a href="/recall">회수·판매중지 약</a></p>
+  <p>약 정보: 식품의약품안전처 의약품 제품 허가정보·의약품개요정보(e약은요). 약국 정보: 국립중앙의료원 전국 약국 정보. 공공데이터포털(data.go.kr) 제공.</p>
+  <p>영업시간은 약국이 신고한 정보라 실제와 다를 수 있어요. 방문 전에 꼭 전화로 확인하세요. 이 사이트는 정보 안내만 하며 약을 팔지 않습니다. 복용은 약사나 의사와 상담하세요.</p>
+</div></footer>
+</body></html>

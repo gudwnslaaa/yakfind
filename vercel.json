@@ -36,6 +36,18 @@
   },
   "rewrites": [
     {
+      "source": "/offline",
+      "destination": "/offline.html"
+    },
+    {
+      "source": "/mybox",
+      "destination": "/mybox.html"
+    },
+    {
+      "source": "/scan",
+      "destination": "/scan.html"
+    },
+    {
       "source": "/moonlight",
       "destination": "/api/clinic?mode=page"
     },
