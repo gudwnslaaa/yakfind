@@ -172,6 +172,7 @@ footer p{margin:4px 0;max-width:80ch}
       <a href="/ingredient"><b>성분별 약</b><span>같은 성분 든 약 전체</span></a>
       <a href="/symptom"><b>증상별 약</b><span>두통·감기·소화불량 등</span></a>
       <a href="/disposal"><b>남은 약 버리는 법</b><span>수거함·우체통·보관법</span></a>
+      <a href="/recall"><b>회수·판매중지 약</b><span>내 약이 회수 대상인지</span></a>
     </nav>
   </div>
 </header>
@@ -277,7 +278,12 @@ function toggleMine(d) {
 }
 function drawMine() {
   const m = mine();
-  $('#mine').innerHTML = m.length ? `<div class="mine"><span>★ 내 약</span>${m.map(x => `<a href="/drug/${esc(x.seq)}">${esc(x.name)}</a>`).join('')}</div>` : '';
+  $('#mine').innerHTML = m.length ? `<div class="mine"><span>★ 내 약</span>${m.map(x => `<a href="/drug/${esc(x.seq)}">${esc(x.name)}</a>`).join('')}</div><div id="mineRecall"></div>` : '';
+  if (m.length) fetch('/api/recall?seqs=' + m.map(x => x.seq).join(',')).then(r => r.json()).then(j => {
+    if (!j.ok || !j.items.length || !$('#mineRecall')) return;
+    const names = [...new Set(j.items.map(r => r.name))];
+    $('#mineRecall').innerHTML = `<p class="hol" style="background:var(--redbg)">⚠ 내 약 중 <b>${esc(names.join(', '))}</b>이(가) 회수·판매중지 목록에 있어요. 제조번호가 같은지 <a href="/recall">회수 목록</a>에서 확인하세요.</p>`;
+  }).catch(() => {});
 }
 
 /* ---------- 증상으로 찾기 ---------- */
@@ -356,6 +362,12 @@ async function select(i) {
   if ($('#sameBtn')) $('#sameBtn').addEventListener('click', () => same(d));
   if ($('#starBtn')) $('#starBtn').addEventListener('click', e => { toggleMine(d); const on = isMine(d.ITEM_SEQ); e.currentTarget.classList.toggle('on', on); e.currentTarget.setAttribute('aria-pressed', on); e.currentTarget.textContent = on ? '★ 내 약에 저장됨' : '☆ 내 약에 저장'; });
   if (window.innerWidth < 900) $('#env').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'});
+  if (d.ITEM_SEQ) fetch('/api/recall?seqs=' + d.ITEM_SEQ).then(r => r.json()).then(j => {
+    if (current !== d || !j.ok || !j.items.length) return;
+    const el = document.createElement('div'); el.className = 'warn';
+    el.innerHTML = `<b>⚠ 회수·판매중지 이력이 있어요</b><br>${j.items.slice(0, 3).map(r => `${esc(r.date.replace(/(\d{4})(\d{2})(\d{2})/, '$1.$2.$3'))} · ${esc(r.reason || '사유 비공개')}${r.lot ? ' · 제조번호 ' + esc(r.lot) : ''}`).join('<br>')}<br>포장의 제조번호가 같을 때만 해당돼요. <a href="/recall">자세히</a>`;
+    $('#env h3').after(el);
+  }).catch(() => {});
   if (!isRx(d) && d.ITEM_SEQ) {
     $('#easy').innerHTML = '<p class="load note">효능·사용법 불러오는 중</p>';
     try {

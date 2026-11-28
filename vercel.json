@@ -26,9 +26,19 @@
     },
     "api/er.js": {
       "maxDuration": 30
+    },
+    "api/recall.js": {
+      "maxDuration": 30
+    },
+    "api/recall-page.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
+    {
+      "source": "/recall",
+      "destination": "/api/recall-page"
+    },
     {
       "source": "/er",
       "destination": "/er.html"
