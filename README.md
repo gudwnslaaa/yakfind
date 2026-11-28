@@ -18,14 +18,20 @@ GitHub에 푸시하면 Vercel이 자동으로 다시 배포합니다.
 - `*.html` (check, pill, scan, mybox, travel, holiday, privacy, er, clinic, convenience, disposal, offline) — **`scripts/`가 만들어 내는 파일. 직접 고치지 말고 `scripts/<이름>.mjs`를 고친 뒤 `node scripts/build.mjs` 실행**
 - `manifest.webmanifest`, `sw.js`, `icon-*.png`, `apple-touch-icon.png` — 홈 화면 설치(PWA)
 
-**서버 함수 (`api/`, Vercel 무료 요금제는 함수 12개까지 → `_`로 시작하는 파일은 함수가 아닌 공용 모듈)**
-- `_lib.js` — 공용: 공공데이터 호출, 성분 정리, 영업시간 계산, 시·도 목록, **모든 페이지 틀 `page()`** (머리말·바닥글·하단 빠른 메뉴·신고 버튼)
+**서버 함수 — `api/[fn].js` 하나뿐** (Vercel 무료 요금제는 함수 12개까지라 하나로 합침)
+- `/api/<이름>` 요청은 모두 `api/[fn].js`가 받아서 `lib/<이름>.js`로 넘겨요. 주소는 예전과 같아요 (`/api/yak`, `/api/clinic` …).
+- 새 API를 만들 땐 `lib/`에 파일을 만들고 `api/[fn].js`의 ROUTES에 한 줄 추가하세요. **`api/` 폴더에 파일을 더 넣지 마세요** (넣는 만큼 함수가 늘어나요).
+- Next.js 프로젝트가 아니라서 `[...path]` 같은 여러 단계 경로는 안 돼요. `/api/이름` 한 단계만 받아요.
+- 확인용: `/api/ping` → `{"ok":true}`
+
+**처리 코드 (`lib/`)**
+- `_lib.js` — 공용: 공공데이터 호출, 성분·함량 정리, 영업시간 계산, 시·도 목록, **모든 페이지 틀 `page()`** (머리말·바닥글·하단 빠른 메뉴·신고 버튼)
 - `yak.js` — 약 검색·성분·e약은요·주변/지역 약국·바코드
 - `drug-page.js` (/drug/품목코드), `region-page.js` (/pharmacy/...), `topic-page.js` (/ingredient, /symptom)
 - `dur-check.js` — 병용금기·중복 확인, `?en=1`은 영문 약 카드 정보
 - `pill-index.js`, `pill.js` — 낱알식별(알약 찾기)
 - `er.js` — 응급실 실시간 병상
-- `clinic.js` (+ `_clinic.js`, `_moonlight.js`) — 병·의원, 달빛어린이병원(/moonlight)
+- `clinic.js` (+ `_clinic.js`, `_moonlight.js`) — 병·의원, 달빛어린이병원(/moonlight, /moonlight/지역)
 - `recall.js` (+ `_recall.js`, `_recall-page.js`) — 회수·판매중지(/recall)
 - `sitemap.js` — /sitemaps/*.xml
 

@@ -3,35 +3,8 @@
     "icn1"
   ],
   "functions": {
-    "api/sitemap.js": {
+    "api/[fn].js": {
       "maxDuration": 60
-    },
-    "api/region-page.js": {
-      "maxDuration": 60
-    },
-    "api/drug-page.js": {
-      "maxDuration": 30
-    },
-    "api/pill-index.js": {
-      "maxDuration": 60
-    },
-    "api/pill.js": {
-      "maxDuration": 60
-    },
-    "api/dur-check.js": {
-      "maxDuration": 30
-    },
-    "api/topic-page.js": {
-      "maxDuration": 30
-    },
-    "api/er.js": {
-      "maxDuration": 30
-    },
-    "api/recall.js": {
-      "maxDuration": 30
-    },
-    "api/clinic.js": {
-      "maxDuration": 30
     }
   },
   "rewrites": [
