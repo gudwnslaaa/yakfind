@@ -12,6 +12,7 @@ export const ROUTES = {
   erList: '/B552657/ErmctInfoInqireService/getEgytListInfoInqire',
   erBed: '/B552657/ErmctInfoInqireService/getEmrrmRltmUsefulSckbdInfoInqire',
   recall: '/1471000/MdcinRtrvlSleStpgeInfoService05/getMdcinRtrvlSleStpgeItem05',
+  permitDtl: '/1471000/DrugPrdtPrmsnInfoService08/getDrugPrdtPrmsnDtlInq08',
   baby: '/B552657/HsptlAsembySearchService/getBabyListInfoInqire',
   hospNear: '/B552657/HsptlAsembySearchService/getHsptlMdcncLcinfoInqire',
   hospList: '/B552657/HsptlAsembySearchService/getHsptlMdcncListInfoInqire',
@@ -136,6 +137,36 @@ export async function findPermit(seq) {
   }
   return null;
 }
+
+// ---- 함량 (허가 상세정보 MATERIAL_NAME: "총량 : 1정615.04밀리그램|성분명 : 아세트아미노펜|분량 : 500|단위 : 밀리그램|…;…") ----
+const UNIT = { '밀리그램': 'mg', '밀리그람': 'mg', '그램': 'g', '마이크로그램': 'μg', '밀리리터': 'mL', '국제단위': 'IU', '단위': '단위' };
+export function parseMaterial(raw) {
+  const out = [], seen = new Set();
+  for (const part of String(raw || '').split(';')) {
+    const o = {};
+    for (const kv of part.split('|')) { const i = kv.indexOf(':'); if (i > 0) o[kv.slice(0, i).trim()] = kv.slice(i + 1).trim(); }
+    let name = o['성분명'], amt = o['분량'], unit = o['단위'];
+    if (!name) continue;
+    const m = String(o['성분정보'] || '').match(/^(.+?)\(으\)로서\s*([\d.]+)\s*([가-힣A-Za-z]+)/);
+    if (m) { name = m[1].trim(); amt = m[2]; unit = m[3]; }
+    const per = (String(o['총량'] || '').match(/^1\s*[가-힣A-Za-z]+(\s*\([^)]*\))?/) || [''])[0].trim();
+    const key = name + amt + unit; if (seen.has(key)) continue; seen.add(key);
+    out.push({ name, amt: amt ? String(+amt || amt) : '', unit: UNIT[unit] || unit || '', per });
+  }
+  return out;
+}
+export async function strengthOf(seq) {
+  const d = await call('permitDtl', { item_seq: seq, numOfRows: 1, type: 'json' });
+  const x = d.items.find(i => i.ITEM_SEQ === seq) || d.items[0];
+  return x ? parseMaterial(x.MATERIAL_NAME) : [];
+}
+// 여러 약에 흔히 들어 있어 겹쳐 먹기 쉬운 성분
+export const DUP_INGR = { acetaminophen: '아세트아미노펜', ibuprofen: '이부프로펜', dexibuprofen: '덱시부프로펜', naproxen: '나프록센', aspirin: '아스피린', chlorpheniramine: '클로르페니라민', diphenhydramine: '디펜히드라민', pseudoephedrine: '슈도에페드린', phenylephrine: '페닐레프린', caffeine: '카페인', dextromethorphan: '덱스트로메토르판', methylephedrine: '메틸에페드린' };
+export const dupOf = ing => [...new Set(ing.map(x => String(x).toLowerCase()).flatMap(x => Object.keys(DUP_INGR).filter(k => x.includes(k) && !(k === 'ibuprofen' && x.includes('dexibuprofen')))))].map(k => DUP_INGR[k]);
+// 일본 등 일부 나라 반입 제한 성분 (외교부 재외공관 안내 기준)
+export const TRAVEL_RISK = { pseudoephedrine: '슈도에페드린', codeine: '코데인', tramadol: '트라마돌', methylphenidate: '메틸페니데이트', amphetamine: '암페타민' };
+export const TRAVEL_NOTICE = 'https://www.mofa.go.kr/jp-osaka-ko/brd/m_26891/view.do?seq=1945798';
+export const travelRiskOf = ing => [...new Set(ing.map(x => String(x).toLowerCase()).flatMap(x => Object.keys(TRAVEL_RISK).filter(k => x.includes(k))))].map(k => TRAVEL_RISK[k]);
 
 // ---- DUR (의약품 안전사용 정보) ----
 const nz = v => { v = clean(v).replace(/^["'\-\s]+|["'\s]+$/g, ''); return v && v !== 'null' ? v : ''; };

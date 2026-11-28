@@ -1,6 +1,6 @@
 // /drug/품목기준코드 → 약 상세 페이지 (검색엔진이 읽을 수 있게 서버에서 완성)
 import { call, callAll, esc, clean, ingredients, ingrSet, koName, showIngr, queryIngr, isRx, alive, imgOf, shortName,
-  page, sendHtml, notFound, failPage, getQuery, findPermit, durFor, groupTaboo, durText, nz } from './_lib.js';
+  page, sendHtml, notFound, failPage, getQuery, findPermit, durFor, groupTaboo, durText, nz, strengthOf, dupOf, travelRiskOf, TRAVEL_NOTICE } from './_lib.js';
 
 const DUR_INFO = {
   임부금기: ['임신 중에는 먹으면 안 돼요', '임신했거나 임신 가능성이 있으면 의사·약사와 먼저 상의하세요.'],
@@ -33,7 +33,7 @@ ${taboo.length > 30 ? `<p class="note">외 ${taboo.length - 30}가지가 더 있
 export default async function handler(req, res) {
   const seq = String(getQuery(req).seq || '').replace(/\D/g, '').slice(0, 12);
   if (!seq) return notFound(res, '품목코드가 없어요.');
-  let d, easy = null, same = [], dur = null, recalls = [];
+  let d, easy = null, same = [], dur = null, recalls = [], str = [];
   try {
     d = await findPermit(seq);
     if (!d) {
@@ -51,12 +51,14 @@ export default async function handler(req, res) {
     }
     const ing = ingredients(d);
     const base = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
-    const [e, s, du, rc] = await Promise.all([
+    const [e, s, du, rc, st] = await Promise.all([
       isRx(d) ? null : call('easy', { itemSeq: seq, numOfRows: 1, type: 'json' }).catch(() => null),
       ing.length ? callAll('permit', { item_ingr_name: queryIngr(ing), type: 'json' }, 100, 5, 5).catch(() => null) : null,
       durFor(seq).catch(() => null),
       fetch(`${base}/api/recall?seqs=${seq}`, { signal: AbortSignal.timeout(20000) }).then(r => r.json()).catch(() => null),
+      strengthOf(seq).catch(() => []),
     ]);
+    str = st || [];
     dur = du; recalls = rc && rc.ok ? rc.items : [];
     easy = e && e.items[0] || null;
     if (s) {
@@ -74,7 +76,16 @@ export default async function handler(req, res) {
   const efcy = easy ? clean(easy.EFCYQESITM) : '';
   const desc = `${sname} 성분(${ingText || '정보 없음'}), ${efcy ? efcy.slice(0, 70) + ' ' : ''}같은 성분 약과 지금 문 연 약국을 확인하세요.`.slice(0, 155);
   const parts = [['효능', 'EFCYQESITM'], ['먹는 법', 'USEMETHODQESITM'], ['꼭 알아둘 경고', 'ATPNWARNQESITM'], ['주의사항', 'ATPNQESITM'], ['같이 먹으면 안 되는 것', 'INTRCQESITM'], ['부작용', 'SEQESITM'], ['보관법', 'DEPOSITMETHODQESITM']];
-  const script = `안녕하세요, ${sname} 있나요?` + (ing.length && !rx ? ` 없으면 같은 성분(${ing.slice(0, 3).map(x => koName(x) || x).join(', ')}) 제품도 괜찮아요.` : '');
+  const strTxt = str.slice(0, 4).map(x => `${x.name} ${x.amt}${x.unit}`).join(', ');
+  const script = `안녕하세요, ${sname} 있나요?` + (ing.length && !rx ? ` 없으면 ${strTxt ? `같은 성분·같은 함량(${strTxt})` : `같은 성분(${ing.slice(0, 3).map(x => koName(x) || x).join(', ')})`} 제품이 있는지 알려 주세요.` : '');
+  const dups = dupOf(ing), risks = travelRiskOf(ing);
+  const today = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10).replace(/-/g, '.');
+  const faq = [
+    [`${sname}은(는) 처방전 없이 살 수 있나요?`, rx ? '아니요. 전문의약품이라 의사의 처방이 있어야 약국에서 받을 수 있어요.' : '네. 일반의약품이라 약국에서 처방전 없이 살 수 있어요. 먹기 전에 약사에게 먹는 법을 확인하세요.'],
+    [`${sname}의 성분과 함량은?`, str.length ? `${str[0].per ? str[0].per + '에 ' : ''}${str.map(x => `${x.name} ${x.amt}${x.unit}`).join(', ')}이(가) 들어 있어요.` : (ing.length ? `${ing.map(x => koName(x) || x).join(', ')}이(가) 들어 있어요.` : '성분 정보가 없어요.')],
+    [`${sname}과(와) 같은 성분 약은?`, same.length ? `성분 구성이 같은 제품이 ${same.length}개 있어요(예: ${same.slice(0, 3).map(x => shortName(clean(x.ITEM_NAME))).join(', ')}). 함량·제형이 다를 수 있으니 바꿔 먹기 전에 약사에게 확인하세요.` : '성분 구성이 똑같은 다른 제품은 찾지 못했어요.'],
+    ...(dups.length ? [[`${sname}을(를) 다른 감기약·진통제와 같이 먹어도 되나요?`, `${dups.join(', ')}은(는) 여러 감기약·진통제에 들어 있는 성분이에요. 다른 약과 함께 먹으면 같은 성분을 두 번 먹게 될 수 있으니, 성분이 겹치는지 먼저 확인하세요.`]] : []),
+  ];
   const thumb = x => { const u = imgOf(x); return `<span class="thumb">${u ? `<img src="${esc(u)}" alt="" loading="lazy" onerror="this.remove()">` : ''}</span>`; };
 
   const body = `
@@ -86,6 +97,9 @@ ${img ? `<a class="photo" href="${esc(img)}" target="_blank" rel="noopener"><img
 
 <h2>성분</h2>
 ${ing.length ? `<div class="chips">${ing.map(x => koName(x) ? `<a href="/ingredient/${encodeURIComponent(koName(x))}" style="background:var(--paper);border-radius:8px;padding:4px 10px;font-weight:500">${esc(showIngr(x))} →</a>` : `<span>${esc(showIngr(x))}</span>`).join('')}</div>` : '<p class="note">성분 정보가 없어요.</p>'}
+${str.length ? `<div class="box" style="margin-top:10px"><b>${esc(str[0].per ? str[0].per + '에 든 양' : '들어 있는 양')}</b><ul style="margin:6px 0 0;padding-left:18px">${str.map(x => `<li>${esc(x.name)} <b>${esc(x.amt + x.unit)}</b></li>`).join('')}</ul></div>` : ''}
+${dups.length ? `<div class="box" style="background:var(--warnbg);border-left:6px solid var(--warn)"><b>⚠ 다른 약과 성분이 겹치기 쉬워요</b><p class="note" style="margin:6px 0 0;color:var(--ink)"><b>${esc(dups.join(', '))}</b>은(는) 여러 감기약·진통제에 함께 들어 있어요. 이 약과 다른 약을 같이 먹으면 같은 성분을 두 번 먹게 될 수 있어요. <a href="/check?seqs=${esc(seq)}">먹는 약과 겹치는지 확인하기 →</a></p></div>` : ''}
+${risks.length ? `<div class="box" style="background:var(--redbg);border-left:6px solid var(--red)"><b>✈ 해외여행 주의</b><p class="note" style="margin:6px 0 0;color:var(--ink)">이 약의 <b>${esc(risks.join(', '))}</b> 성분은 일본 등 일부 나라에서 반입이 제한되거나 사전 허가가 필요해요. 여행 전에 <a href="${TRAVEL_NOTICE}" target="_blank" rel="noopener">외교부 재외공관 안내</a>와 가는 나라의 규정을 확인하세요.</p></div>` : ''}
 ${rx ? '<p class="box">전문의약품이라 처방전이 있어야 살 수 있어요. 처방전을 받았다면 약국에 이 약이 있는지 전화로 먼저 물어보세요.</p>' : ''}
 
 <div class="box cta">
@@ -107,7 +121,9 @@ ${durHtml(dur)}
 <h2>같은 성분 제품 ${same.length ? `<small class="note">${same.length}개</small>` : ''}</h2>
 ${same.length ? `<ul class="list">${same.slice(0, 40).map(x => `<li><a class="it" href="/drug/${esc(x.ITEM_SEQ)}">${thumb(x)}<span><b>${esc(clean(x.ITEM_NAME))}</b><small>${esc(clean(x.ENTP_NAME))} · ${isRx(x) ? '전문' : '일반'}</small></span></a></li>`).join('')}</ul>
 <p class="note">성분이 같아도 함량이나 제형(정·캡슐·시럽)이 다를 수 있어요. 바꿔 사기 전에 약사에게 꼭 확인하세요.</p>` : '<p class="note">성분 구성이 똑같은 다른 제품을 찾지 못했어요.</p>'}
-<p class="note" style="margin-top:24px">품목기준코드 ${esc(seq)}${d.ITEM_PERMIT_DATE ? ` · 허가일 ${esc(d.ITEM_PERMIT_DATE.replace(/(\d{4})(\d{2})(\d{2})/, '$1.$2.$3'))}` : ''} · 자료: 식품의약품안전처</p>`;
+<h2>자주 묻는 질문</h2>
+${faq.map(([q, a]) => `<details class="sec" style="margin-bottom:8px"><summary><b>${esc(q)}</b></summary><p style="margin:8px 0 0">${esc(a)}</p></details>`).join('')}
+<p class="note" style="margin-top:24px">자료: 식품의약품안전처 의약품 허가정보·의약품개요정보(e약은요)·DUR · 정보 확인 ${today} · 이 페이지는 정보 안내이며 진료·복약지도를 대신하지 않아요.<br>품목기준코드 ${esc(seq)}${d.ITEM_PERMIT_DATE ? ` · 허가일 ${esc(d.ITEM_PERMIT_DATE.replace(/(\d{4})(\d{2})(\d{2})/, '$1.$2.$3'))}` : ''} · 자료: 식품의약품안전처</p>`;
 
   const jsonld = {
     '@context': 'https://schema.org', '@type': 'Drug', name, url: `https://yakfind.vercel.app/drug/${seq}`,
@@ -117,5 +133,7 @@ ${same.length ? `<ul class="list">${same.slice(0, 40).map(x => `<li><a class="it
     prescriptionStatus: rx ? 'https://schema.org/PrescriptionOnly' : 'https://schema.org/OTC',
     ...(efcy ? { description: efcy.slice(0, 300) } : {}),
   };
-  sendHtml(res, 200, page({ title: `${sname} 성분·효능·같은 성분 약 | 이 약, 어디 있지?`, desc, path: `/drug/${seq}`, body, jsonld, image: img || undefined }), 2592000);
+  const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) };
+  if (str.length) jsonld.activeIngredient = str.map(x => `${x.name} ${x.amt}${x.unit}`).join(', ');
+  sendHtml(res, 200, page({ title: `${sname} 성분·효능·같은 성분 약 | 이 약, 어디 있지?`, desc, path: `/drug/${seq}`, body, jsonld: [jsonld, faqLd], image: img || undefined }), 2592000);
 }
