@@ -10,7 +10,18 @@ function send(res, status, obj, cache) {
 const keyMatch = (a, b) => a && b && (a === b || a.startsWith(b + ' ') || b.startsWith(a + ' '));
 
 export default async function handler(req, res) {
-  const seqs = [...new Set(String(getQuery(req).seqs || '').split(',').map(s => s.replace(/\D/g, '')).filter(Boolean))].slice(0, 5);
+  const q = getQuery(req);
+  const seqs = [...new Set(String(q.seqs || '').split(',').map(s => s.replace(/\D/g, '')).filter(Boolean))].slice(0, q.en ? 8 : 5);
+  if (q.en) { // /api/dur-check?en=1&seqs=… → 해외여행용 영문 약 카드 정보
+    if (!seqs.length) return send(res, 400, { ok: false, error: '약을 골라 주세요.' });
+    const drugs = await Promise.all(seqs.map(async seq => {
+      const p = await findPermit(seq).catch(() => null);
+      if (!p) return { seq, ok: false };
+      return { seq, ok: true, name: shortName(p.ITEM_NAME), en: clean(p.ITEM_ENG_NAME || ''), type: clean(p.PRDUCT_TYPE || '').replace(/^\[\d+\]/, ''),
+        rx: /전문/.test(p.SPCLTY_PBLC || ''), ingr: ingredients(p).map(x => ({ en: x, ko: koName(x) })) };
+    }));
+    return send(res, 200, { ok: true, drugs }, true);
+  }
   if (seqs.length < 2) return send(res, 400, { ok: false, error: '약을 두 개 이상 골라 주세요.' });
   try {
     const drugs = await Promise.all(seqs.map(async seq => {

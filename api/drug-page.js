@@ -94,6 +94,11 @@ ${rx ? '<p class="box">전문의약품이라 처방전이 있어야 살 수 있�
   <p style="margin:0 0 12px">“${esc(script)}”</p>
   <a class="btn red" href="/?q=${encodeURIComponent(sname)}">지금 문 연 약국 찾기</a>
 </div>
+<p style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0"><button class="btn" type="button" id="boxBtn">★ 우리 집 약 상자에 넣기</button><a class="btn" href="/check?seqs=${esc(seq)}">같이 먹어도 되나요?</a><a class="btn" href="/travel?seqs=${esc(seq)}">✈ 해외용 영문 약 카드</a></p>
+<script>{const b=document.getElementById('boxBtn'),K='yak_mine',seq=${JSON.stringify(String(seq))},nm=${JSON.stringify(String(sname)).replace(/</g, "\\u003c")};
+const get=()=>{try{return JSON.parse(localStorage.getItem(K))||[]}catch(e){return[]}};const on=()=>get().some(x=>x.seq===seq);
+const draw=()=>{b.textContent=on()?'★ 약 상자에 있어요 (약 상자 열기)':'☆ 우리 집 약 상자에 넣기'};draw();
+b.addEventListener('click',()=>{if(on()){location.href='/mybox';return}const a=get();a.unshift({seq,name:nm,who:'나',at:Date.now()});try{localStorage.setItem(K,JSON.stringify(a.slice(0,80)))}catch(e){}draw()});}</script>
 
 ${easy ? `<h2>효능과 먹는 법</h2>` + parts.filter(([, k]) => clean(easy[k])).map(([t, k]) => `<section class="sec"><h3>${t}</h3><p>${esc(clean(easy[k]))}</p></section>`).join('<br>') : ''}
 
